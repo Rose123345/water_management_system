@@ -1,0 +1,11 @@
+{% extends 'base.html' %}
+{% block title %}Deactivate Customer{% endblock %}
+{% block content %}
+<h2>Deactivate {{ customer.name }}?</h2>
+<p>This marks the customer as inactive. Their history is kept, not deleted.</p>
+<form method="post">
+  {% csrf_token %}
+  <button type="submit">Yes, deactivate</button>
+  <a href="{% url 'customers:list' %}">Cancel</a>
+</form>
+{% endblock %}
