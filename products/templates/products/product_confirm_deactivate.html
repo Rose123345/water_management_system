@@ -1,0 +1,11 @@
+{% extends 'base.html' %}
+{% block title %}Deactivate Product{% endblock %}
+{% block content %}
+<h2>Deactivate {{ product.name }}?</h2>
+<p>This marks the product as inactive. Existing production and order records will still reference it.</p>
+<form method="post">
+  {% csrf_token %}
+  <button type="submit">Yes, deactivate</button>
+  <a href="{% url 'products:list' %}">Cancel</a>
+</form>
+{% endblock %}

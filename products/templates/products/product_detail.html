@@ -1,0 +1,12 @@
+{% extends 'base.html' %}
+{% block title %}{{ product.name }}{% endblock %}
+{% block content %}
+<h2>{{ product.name }}</h2>
+<p><strong>Type:</strong> {{ product.get_product_type_display }}</p>
+<p><strong>Package Size:</strong> {{ product.package_size }}</p>
+<p><strong>Unit Price:</strong> GH₵{{ product.unit_price }}</p>
+<p><strong>Reorder Level:</strong> {{ product.reorder_level }}</p>
+<p><strong>Description:</strong> {{ product.description|default:"-" }}</p>
+<p><strong>Status:</strong> {{ product.get_status_display }}</p>
+<a href="{% url 'products:list' %}">Back to list</a>
+{% endblock %}

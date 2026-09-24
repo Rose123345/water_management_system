@@ -1,0 +1,37 @@
+{% extends 'base.html' %}
+{% block title %}Products{% endblock %}
+{% block content %}
+<h2>Products</h2>
+<form method="get" style="margin-bottom:15px;">
+  <input type="text" name="q" value="{{ query }}" placeholder="Search by name">
+  <button type="submit">Search</button>
+</form>
+{% if can_manage %}
+<a href="{% url 'products:add' %}">+ Add Product</a>
+{% endif %}
+<table border="1" cellpadding="8" cellspacing="0" style="width:100%; margin-top:10px; border-collapse:collapse;">
+  <tr><th>Name</th><th>Type</th><th>Size</th><th>Price (GH₵)</th><th>Reorder Level</th><th>Status</th>{% if can_manage %}<th>Actions</th>{% endif %}</tr>
+  {% for product in products %}
+  <tr>
+    <td><a href="{% url 'products:detail' product.pk %}">{{ product.name }}</a></td>
+    <td>{{ product.get_product_type_display }}</td>
+    <td>{{ product.package_size }}</td>
+    <td>{{ product.unit_price }}</td>
+    <td>{{ product.reorder_level }}</td>
+    <td>{{ product.get_status_display }}</td>
+    {% if can_manage %}
+    <td>
+      <a href="{% url 'products:edit' product.pk %}">Edit</a>
+      {% if product.status == 'active' %}
+        | <a href="{% url 'products:deactivate' product.pk %}">Deactivate</a>
+      {% else %}
+        | <a href="{% url 'products:activate' product.pk %}">Activate</a>
+      {% endif %}
+    </td>
+    {% endif %}
+  </tr>
+  {% empty %}
+  <tr><td colspan="7">No products found.</td></tr>
+  {% endfor %}
+</table>
+{% endblock %}
