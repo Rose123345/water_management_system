@@ -1,0 +1,59 @@
+{% extends 'base.html' %}
+{% block title %}Inventory{% endblock %}
+{% block content %}
+<h1>Inventory</h1>
+<p><a href="{% url 'inventory:movement_add' %}">Record stock movement</a></p>
+
+<h2>Low Stock</h2>
+{% if low_stock_products %}
+  <table>
+    <thead><tr><th>Product</th><th>Available</th><th>Reorder level</th></tr></thead>
+    <tbody>
+      {% for product in low_stock_products %}
+        <tr>
+          <td>{{ product.name }}</td>
+          <td>{{ product.stock_quantity }}</td>
+          <td>{{ product.reorder_level }}</td>
+        </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+{% else %}
+  <p>No products are currently at or below their reorder level.</p>
+{% endif %}
+
+<h2>Stock On Hand</h2>
+<table>
+  <thead><tr><th>Product</th><th>Available quantity</th><th>Reorder level</th></tr></thead>
+  <tbody>
+    {% for product in products %}
+      <tr>
+        <td>{{ product.name }}</td>
+        <td>{{ product.stock_quantity }}</td>
+        <td>{{ product.reorder_level }}</td>
+      </tr>
+    {% empty %}
+      <tr><td colspan="3">No products found.</td></tr>
+    {% endfor %}
+  </tbody>
+</table>
+
+<h2>Recent Stock Movements</h2>
+<table>
+  <thead><tr><th>Recorded</th><th>Product</th><th>Movement</th><th>Quantity</th><th>Reference</th><th>Recorded by</th></tr></thead>
+  <tbody>
+    {% for movement in movements %}
+      <tr>
+        <td>{{ movement.created_at|date:"M j, Y H:i" }}</td>
+        <td>{{ movement.product.name }}</td>
+        <td>{{ movement.get_movement_type_display }}</td>
+        <td>{{ movement.quantity }}</td>
+        <td>{% if movement.production_batch %}{{ movement.production_batch.batch_number }}{% else %}{{ movement.note|default:"-" }}{% endif %}</td>
+        <td>{{ movement.recorded_by|default:"-" }}</td>
+      </tr>
+    {% empty %}
+      <tr><td colspan="6">No stock movements recorded.</td></tr>
+    {% endfor %}
+  </tbody>
+</table>
+{% endblock %}

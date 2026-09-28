@@ -1,0 +1,9 @@
+{% extends 'base.html' %}
+{% block title %}Dashboard{% endblock %}
+{% block content %}
+<h1>Dashboard</h1>
+<p>Orders: {{ order_count }} | Payments received: {{ payment_total }} | Units produced: {{ production_total }}</p>
+<h2>Recent orders</h2><ul>{% for order in recent_orders %}<li><a href="{% url 'sales:detail' order.pk %}">{{ order.order_number }}</a> - {{ order.customer }} - {{ order.get_status_display }}</li>{% empty %}<li>No orders yet.</li>{% endfor %}</ul>
+<h2>Low stock</h2><ul>{% for stock in low_stock %}<li>{{ stock.product }}: {{ stock.quantity_on_hand }}</li>{% empty %}<li>No low-stock products.</li>{% endfor %}</ul>
+<h2>Pending deliveries</h2><ul>{% for delivery in pending_deliveries %}<li>{{ delivery.order.order_number }} - {{ delivery.get_status_display }}</li>{% empty %}<li>No pending deliveries.</li>{% endfor %}</ul>
+{% endblock %}

@@ -1,0 +1,32 @@
+{% extends 'base.html' %}
+{% block title %}Production History{% endblock %}
+{% block content %}
+<h1>Production History</h1>
+<p><a href="{% url 'production:add' %}">Record production batch</a></p>
+{% if batches %}
+  <table>
+    <thead>
+      <tr>
+        <th>Batch number</th>
+        <th>Product</th>
+        <th>Production date</th>
+        <th>Quantity produced</th>
+        <th>Recorded by</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for batch in batches %}
+        <tr>
+          <td>{{ batch.batch_number }}</td>
+          <td>{{ batch.product }}</td>
+          <td>{{ batch.production_date|date:"M j, Y" }}</td>
+          <td>{{ batch.quantity_produced }}</td>
+          <td>{{ batch.recorded_by|default:"-" }}</td>
+        </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+{% else %}
+  <p>No production batches recorded yet.</p>
+{% endif %}
+{% endblock %}

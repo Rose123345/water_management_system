@@ -1,0 +1,13 @@
+{% extends 'base.html' %}
+{% block title %}{{ order.order_number }}{% endblock %}
+{% block content %}
+<h1>{{ order.order_number }}</h1>
+<p>Customer: {{ order.customer }} | Status: {{ order.get_status_display }}</p>
+<table>
+  <tr><th>Product</th><th>Quantity</th><th>Unit price</th><th>Line total</th></tr>
+  {% for item in order.items.all %}<tr><td>{{ item.product }}</td><td>{{ item.quantity }}</td><td>{{ item.unit_price }}</td><td>{{ item.line_total }}</td></tr>{% endfor %}
+</table>
+<p>Subtotal: {{ order.subtotal }} | Paid: {{ order.amount_paid }} | Balance: {{ order.balance }}</p>
+{% if order.status == 'draft' and can_manage %}<form method="post" action="{% url 'sales:advance' order.pk %}">{% csrf_token %}<button type="submit">Confirm order</button></form>{% endif %}
+{% if order.balance > 0 %}<p><a href="{% url 'payments:add' order.pk %}">Record payment</a></p>{% endif %}
+{% endblock %}

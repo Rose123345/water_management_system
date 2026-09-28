@@ -1,0 +1,11 @@
+{% extends 'base.html' %}
+{% block title %}Create Order{% endblock %}
+{% block content %}
+<h1>Create Order</h1>
+<form method="post">
+  {% csrf_token %}{{ form.as_p }}
+  {{ formset.management_form }}
+  {% for item_form in formset %}<fieldset>{{ item_form.as_p }}</fieldset>{% endfor %}
+  <button type="submit">Create order</button>
+</form>
+{% endblock %}

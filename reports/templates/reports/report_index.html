@@ -1,0 +1,10 @@
+{% extends 'base.html' %}
+{% block title %}Reports{% endblock %}
+{% block content %}
+<h1>Reports</h1>
+<p>Sales total: {{ sales_total }} | Payments: {{ payment_total }} | Units produced: {{ production_total }}</p>
+<h2>Inventory report</h2><ul>{% for stock_item in stock %}<li>{{ stock_item.product }}: {{ stock_item.quantity_on_hand }}</li>{% empty %}<li>No stock records.</li>{% endfor %}</ul>
+<h2>Payment report</h2><p>Completed payments received: {{ payment_total }}</p>
+<h2>Delivery report</h2><ul>{% for delivery in deliveries %}<li>{{ delivery.order.order_number }} - {{ delivery.get_status_display }} - {{ delivery.scheduled_date }}</li>{% empty %}<li>No deliveries.</li>{% endfor %}</ul>
+<h2>Recent inventory movements</h2><ul>{% for movement in inventory_movements %}<li>{{ movement.created_at }}: {{ movement.get_movement_type_display }} - {{ movement.product }} x {{ movement.quantity }}</li>{% empty %}<li>No movements.</li>{% endfor %}</ul>
+{% endblock %}

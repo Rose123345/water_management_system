@@ -1,0 +1,3 @@
+{% extends 'base.html' %}
+{% block title %}Record Expense{% endblock %}
+{% block content %}<h1>Record expense</h1><form method="post">{% csrf_token %}{{ form.as_p }}<button type="submit">Save expense</button></form>{% endblock %}

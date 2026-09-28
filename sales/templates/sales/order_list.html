@@ -1,0 +1,16 @@
+{% extends 'base.html' %}
+{% block title %}Sales Orders{% endblock %}
+{% block content %}
+<h1>Sales Orders</h1>
+<p><a href="{% url 'sales:add' %}">Create order</a></p>
+<table>
+  <tr><th>Order</th><th>Customer</th><th>Status</th><th>Total</th><th>Balance</th></tr>
+  {% for order in orders %}
+  <tr>
+    <td><a href="{% url 'sales:detail' order.pk %}">{{ order.order_number }}</a></td>
+    <td>{{ order.customer }}</td><td>{{ order.get_status_display }}</td>
+    <td>{{ order.total }}</td><td>{{ order.balance }}</td>
+  </tr>
+  {% empty %}<tr><td colspan="5">No orders found.</td></tr>{% endfor %}
+</table>
+{% endblock %}

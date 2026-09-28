@@ -1,0 +1,11 @@
+{% extends 'base.html' %}
+{% block title %}Record Production{% endblock %}
+{% block content %}
+<h1>Record Production Batch</h1>
+<form method="post">
+  {% csrf_token %}
+  {{ form.as_p }}
+  <button type="submit">Save batch</button>
+  <a href="{% url 'production:list' %}">Cancel</a>
+</form>
+{% endblock %}

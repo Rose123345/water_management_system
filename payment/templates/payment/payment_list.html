@@ -1,0 +1,7 @@
+{% extends 'base.html' %}
+{% block title %}Payments{% endblock %}
+{% block content %}
+<h1>Payments for {{ order.order_number }}</h1>
+<p><a href="{% url 'payments:add' order.pk %}">Record payment</a></p>
+{% for payment in payments %}<p>{{ payment.amount }} - {{ payment.get_method_display }} - {{ payment.get_status_display }}</p>{% empty %}<p>No payments recorded.</p>{% endfor %}
+{% endblock %}
