@@ -1,0 +1,54 @@
+{% extends 'public_base.html' %}
+{% block title %}Contact | WMDMS{% endblock %}
+{% block styles %}
+<style>
+  .contact-layout { display: grid; grid-template-columns: .82fr 1.18fr; max-width: 1100px; margin: 0 auto; padding: 58px 34px 78px; gap: 60px; }
+  .contact-copy { padding-top: 10px; }
+  .eyebrow { color: var(--green); font-size: 12px; font-weight: 700; text-transform: uppercase; }
+  h1 { margin: 13px 0 16px; font: 800 42px/1.15 'Manrope', sans-serif; letter-spacing: 0; }
+  .contact-copy > p { margin: 0; color: var(--muted); font-size: 15px; line-height: 1.75; }
+  .contact-note { margin-top: 27px; padding: 15px 17px; border-left: 3px solid var(--coral); background: #eaf1eb; color: var(--muted); font-size: 13px; line-height: 1.65; }
+  .contact-form { padding: 24px; border: 1px solid var(--line); border-radius: 4px; background: white; }
+  .contact-form h2 { margin: 0 0 20px; font: 700 18px 'Manrope', sans-serif; }
+  .field { display: grid; gap: 7px; margin-bottom: 15px; }
+  .field label { color: var(--ink); font-size: 12px; font-weight: 700; }
+  .field input, .field textarea { width: 100%; padding: 11px 12px; border: 1px solid #cbd9d0; border-radius: 3px; background: #fcfdfc; color: var(--ink); font: 14px 'DM Sans', sans-serif; }
+  .field input { height: 43px; }
+  .field textarea { min-height: 125px; resize: vertical; line-height: 1.55; }
+  .field input:focus, .field textarea:focus { outline: 2px solid #8eb9a4; outline-offset: 1px; }
+  .field-error { color: #a23c2b; font-size: 12px; }
+  .contact-form button { min-height: 44px; padding: 0 19px; border: 0; border-radius: 4px; background: var(--green); color: white; font: 700 13px 'DM Sans', sans-serif; cursor: pointer; }
+  .contact-form button:hover { background: var(--green-dark); }
+  .form-footnote { display: block; margin-top: 12px; color: var(--muted); font-size: 11px; }
+  @media (max-width: 700px) {
+    .contact-layout { grid-template-columns: 1fr; padding: 42px 20px 58px; gap: 25px; }
+    h1 { font-size: 36px; }
+    .contact-form { padding: 19px; }
+  }
+</style>
+{% endblock %}
+{% block content %}
+<section class="contact-layout">
+  <div class="contact-copy">
+    <span class="eyebrow">Contact the team</span>
+    <h1>How can we help?</h1>
+    <p>Send a question about our products or the water management system. Your message will be recorded for the team to review.</p>
+    <div class="contact-note">For access to operational tools, please use the Log in link. This form is for general product and system inquiries.</div>
+  </div>
+  <form class="contact-form" method="post">
+    {% csrf_token %}
+    {{ form.website }}
+    <h2>Send an inquiry</h2>
+    {% for field in form.visible_fields %}
+      <div class="field">
+        <label for="{{ field.id_for_label }}">{{ field.label }}</label>
+        {{ field }}
+        {% for error in field.errors %}<span class="field-error">{{ error }}</span>{% endfor %}
+      </div>
+    {% endfor %}
+    {% for error in form.non_field_errors %}<span class="field-error">{{ error }}</span>{% endfor %}
+    <button type="submit">Send message</button>
+    <span class="form-footnote">Your email address is used only to identify your inquiry.</span>
+  </form>
+</section>
+{% endblock %}

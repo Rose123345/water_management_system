@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#f3f7f3">
+  <title>{% block title %}WMDMS | Water operations{% endblock %}</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Manrope:wght@500;600;700;800&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      color-scheme: light;
+      --ink: #173b3a;
+      --muted: #617472;
+      --paper: #f3f7f3;
+      --white: #fff;
+      --green: #176c58;
+      --green-dark: #104d42;
+      --coral: #dc7659;
+      --line: #dce7df;
+      font-family: 'DM Sans', sans-serif;
+    }
+    * { box-sizing: border-box; }
+    body { margin: 0; color: var(--ink); background: var(--paper); }
+    a { color: inherit; }
+    .site-header { height: 82px; display: flex; align-items: center; justify-content: space-between; max-width: 1240px; margin: auto; padding: 0 34px; }
+    .brand { display: inline-flex; align-items: center; gap: 11px; text-decoration: none; font: 800 19px 'Manrope', sans-serif; letter-spacing: 0; }
+    .brand-mark { display: grid; width: 42px; height: 42px; place-items: center; border-radius: 14px 14px 14px 5px; background: var(--green); box-shadow: 0 5px 12px #176c5826; }
+    .brand-mark svg { display: block; width: 25px; height: 25px; }
+    .nav-links { display: flex; align-items: center; gap: 30px; font-size: 14px; font-weight: 600; }
+    .nav-links a { text-decoration: none; }
+    .nav-links a:hover { color: var(--green); }
+    .nav-links a:focus-visible, .brand:focus-visible, .site-footer a:focus-visible { outline: 3px solid var(--coral); outline-offset: 4px; }
+    .nav-cta, .button { display: inline-flex; align-items: center; justify-content: center; min-height: 44px; padding: 0 20px; border: 0; border-radius: 5px; background: var(--green); color: white !important; font-weight: 700; text-decoration: none; transition: background .18s ease, transform .18s ease; }
+    .nav-cta:hover, .button:hover { background: var(--green-dark); transform: translateY(-1px); }
+    main { min-height: calc(100vh - 150px); }
+    .flash-list { max-width: 1172px; margin: 0 auto; padding: 0 34px; }
+    .flash { margin: 12px 0; padding: 12px 15px; border-left: 3px solid var(--green); background: #e6f1e9; color: var(--green-dark); font-size: 14px; }
+    .site-footer { display: flex; justify-content: space-between; gap: 20px; max-width: 1240px; margin: auto; padding: 24px 34px 30px; color: var(--muted); font-size: 12px; }
+    .site-footer a { text-decoration: none; }
+    @media (max-width: 600px) {
+      .site-header { height: 70px; padding: 0 20px; }
+      .nav-links { gap: 17px; font-size: 13px; }
+      .nav-cta { min-height: 39px; padding: 0 13px; }
+      .site-footer { padding: 20px; }
+      .flash-list { padding: 0 20px; }
+    }
+    @media (max-width: 430px) {
+      .site-header { height: auto; min-height: 70px; align-items: flex-start; flex-direction: column; gap: 12px; padding: 12px 20px 15px; }
+      .nav-links { width: 100%; justify-content: space-between; gap: 8px; font-size: 12px; }
+      .nav-cta { min-height: 36px; padding: 0 10px; }
+    }
+  </style>
+  {% block styles %}{% endblock %}
+</head>
+<body>
+  <header class="site-header">
+    <a class="brand" href="{% url 'home' %}">
+      <span class="brand-mark" aria-hidden="true">
+        <svg viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <path d="M16 3.5C12.5 8.2 6.4 14 6.4 20.1a9.6 9.6 0 1 0 19.2 0C25.6 14 19.5 8.2 16 3.5Z" fill="#F3F7F3"/>
+          <path d="M10.4 20.2c2.1-1.5 4.1-1.5 6.2 0s4.1 1.5 6.2 0" stroke="#DC7659" stroke-width="2.2" stroke-linecap="round"/>
+        </svg>
+      </span>
+      WMDMS
+    </a>
+    <nav class="nav-links" aria-label="Main navigation">
+      <a href="{% url 'products:catalogue' %}">Products</a>
+      <a href="{% url 'about' %}">About</a>
+      <a href="{% url 'contact:contact' %}">Contact</a>
+      <a class="nav-cta" href="{% url 'accounts:login' %}">Log in</a>
+      {% if user.is_authenticated %}
+        <a class="nav-cta" href="{% url 'dashboard:home' %}">Open workspace</a>
+      {% endif %}
+    </nav>
+  </header>
+  {% if messages %}
+    <div class="flash-list" role="status">
+      {% for message in messages %}<div class="flash">{{ message }}</div>{% endfor %}
+    </div>
+  {% endif %}
+  <main>{% block content %}{% endblock %}</main>
+  <footer class="site-footer">
+    <span>Water Manufacturing &amp; Distribution Management System</span>
+    <span><a href="{% url 'about' %}">About</a> &nbsp;·&nbsp; <a href="{% url 'contact:contact' %}">Contact</a></span>
+  </footer>
+</body>
+</html>

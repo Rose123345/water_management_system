@@ -1,0 +1,82 @@
+{% extends 'public_base.html' %}
+{% block title %}Products | WMDMS{% endblock %}
+{% block styles %}
+<style>
+  .catalogue { max-width: 1172px; margin: 0 auto; padding: 54px 34px 72px; }
+  .catalogue-heading { margin-bottom: 27px; }
+  .eyebrow { color: var(--green); font-size: 12px; font-weight: 700; text-transform: uppercase; }
+  h1 { margin: 11px 0 8px; font: 800 42px/1.15 'Manrope', sans-serif; letter-spacing: 0; }
+  .intro { max-width: 600px; margin: 0; color: var(--muted); font-size: 15px; line-height: 1.7; }
+  .filter-form { display: flex; flex-wrap: wrap; align-items: end; gap: 10px; margin-bottom: 22px; padding: 15px; border: 1px solid var(--line); border-radius: 4px; background: #eaf1eb; }
+  .filter-field { display: grid; gap: 6px; }
+  .filter-field label { color: var(--muted); font-size: 11px; font-weight: 700; }
+  .filter-field input, .filter-field select { width: 230px; height: 42px; padding: 0 11px; border: 1px solid #cbd9d0; border-radius: 3px; background: white; color: var(--ink); font: inherit; }
+  .filter-field select { width: 190px; }
+  .filter-form button { min-height: 42px; padding: 0 17px; border: 0; border-radius: 4px; background: var(--green); color: white; font: 700 13px 'DM Sans', sans-serif; cursor: pointer; }
+  .filter-form button:hover { background: var(--green-dark); }
+  .product-grid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 14px; }
+  .product-card { min-height: 228px; padding: 19px; border: 1px solid var(--line); border-radius: 4px; background: white; transition: border-color .18s ease, box-shadow .18s ease, transform .18s ease; }
+  .product-card:hover { transform: translateY(-3px); border-color: #b4cfc0; box-shadow: 0 12px 26px #173b3a12; }
+  .product-topline { display: flex; align-items: center; justify-content: space-between; gap: 12px; }
+  .type-label { display: inline-flex; align-items: center; gap: 7px; color: var(--green); font-size: 11px; font-weight: 700; }
+  .type-label::before { width: 7px; height: 7px; border-radius: 50%; background: var(--coral); content: ''; }
+  .size { color: var(--muted); font-size: 12px; }
+  h2 { margin: 20px 0 8px; font: 700 19px 'Manrope', sans-serif; letter-spacing: 0; }
+  .description { min-height: 42px; margin: 0; color: var(--muted); font-size: 13px; line-height: 1.6; }
+  .price-row { display: flex; align-items: baseline; justify-content: space-between; gap: 12px; margin-top: 16px; padding-top: 13px; border-top: 1px solid #edf1ed; }
+  .price { color: var(--green-dark); font: 800 19px 'Manrope', sans-serif; }
+  .price-note { color: var(--muted); font-size: 11px; }
+  .empty-state { grid-column: 1 / -1; padding: 36px 20px; border: 1px dashed #b9cbc0; color: var(--muted); text-align: center; }
+  @media (max-width: 850px) { .product-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+  @media (max-width: 620px) {
+    .catalogue { padding: 42px 20px 56px; }
+    h1 { font-size: 36px; }
+    .product-grid { grid-template-columns: 1fr; }
+    .filter-field, .filter-field input, .filter-field select { width: 100%; }
+    .filter-form { align-items: stretch; }
+  }
+</style>
+{% endblock %}
+{% block content %}
+<section class="catalogue">
+  <div class="catalogue-heading">
+    <span class="eyebrow">Our product range</span>
+    <h1>Products</h1>
+    <p class="intro">Browse the currently available water products and package sizes.</p>
+  </div>
+  <form class="filter-form" method="get">
+    <div class="filter-field">
+      <label for="product-search">Search products</label>
+      <input id="product-search" type="search" name="q" value="{{ query }}" placeholder="Product name">
+    </div>
+    <div class="filter-field">
+      <label for="product-type">Product type</label>
+      <select id="product-type" name="type">
+        <option value="">All types</option>
+        {% for value, label in product_types %}
+          <option value="{{ value }}" {% if selected_type == value %}selected{% endif %}>{{ label }}</option>
+        {% endfor %}
+      </select>
+    </div>
+    <button type="submit">Filter products</button>
+  </form>
+  <div class="product-grid">
+    {% for product in products %}
+      <article class="product-card">
+        <div class="product-topline">
+          <span class="type-label">{{ product.get_product_type_display }}</span>
+          <span class="size">{{ product.package_size }}</span>
+        </div>
+        <h2>{{ product.name }}</h2>
+        <p class="description">{{ product.description|default:'Quality water, carefully prepared for everyday use.' }}</p>
+        <div class="price-row">
+          <span class="price">GH₵{{ product.unit_price|floatformat:2 }}</span>
+          <span class="price-note">per unit</span>
+        </div>
+      </article>
+    {% empty %}
+      <p class="empty-state">No active products match your search. Try another name or product type.</p>
+    {% endfor %}
+  </div>
+</section>
+{% endblock %}

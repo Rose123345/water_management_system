@@ -7,6 +7,22 @@
 <body style="font-family: Arial, sans-serif; margin:0; background:#F8FAFC; color:#1E293B;">
   <div style="background:#0B5ED7; color:white; padding:12px 20px;">
     <strong>Water Manufacturing System</strong>
+    {% if user.is_authenticated %}
+      <a href="{% url 'customers:list' %}" style="color:white; margin-left:20px;">Customers</a>
+      <a href="{% url 'products:list' %}" style="color:white; margin-left:20px;">Products</a>
+      <a href="{% url 'production:list' %}" style="color:white; margin-left:20px;">Production History</a>
+      <a href="{% url 'inventory:list' %}" style="color:white; margin-left:20px;">Inventory</a>
+      <a href="{% url 'sales:list' %}" style="color:white; margin-left:20px;">Orders</a>
+      <a href="{% url 'distribution:list' %}" style="color:white; margin-left:20px;">Deliveries</a>
+      <a href="{% url 'expenses:list' %}" style="color:white; margin-left:20px;">Expenses</a>
+      <a href="{% url 'dashboard:home' %}" style="color:white; margin-left:20px;">Dashboard</a>
+      <a href="{% url 'reports:index' %}" style="color:white; margin-left:20px;">Reports</a>
+      <a href="{% url 'accounts:login' %}" style="color:white; margin-left:20px;">Accounts</a>
+      <a href="{% url 'accounts:logout' %}" style="color:white; margin-left:20px;">Log out</a>
+    {% else %}
+      <a href="{% url 'accounts:login' %}" style="color:white; margin-left:20px;">Log in</a>
+      <a href="{% url 'accounts:register' %}" style="color:white; margin-left:20px;">Create account</a>
+    {% endif %}
   </div>
   <div style="padding:20px;">
     {% if messages %}
