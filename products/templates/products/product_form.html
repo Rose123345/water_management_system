@@ -1,11 +1,13 @@
 {% extends 'base.html' %}
 {% block title %}{{ title }}{% endblock %}
+{% block page_heading %}Products{% endblock %}
 {% block content %}
-<h2>{{ title }}</h2>
+<header class="page-heading"><div><span class="page-kicker">Product catalogue</span><h1>{{ title }}</h1><p>Set product details, pricing, and reorder thresholds.</p></div></header>
+<div class="form-shell entry-form">
 <form method="post">
   {% csrf_token %}
   {{ form.as_p }}
-  <button type="submit">Save</button>
-  <a href="{% url 'products:list' %}">Cancel</a>
+  <div class="form-actions"><button type="submit">Save product</button><a href="{% url 'products:list' %}">Cancel</a></div>
 </form>
+</div>
 {% endblock %}

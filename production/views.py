@@ -1,5 +1,5 @@
 from django.contrib import messages
-from django.contrib.auth.decorators import login_required
+from accounts.permissions import ROLE_ACCESS, role_required
 from django.db import transaction
 from Inventory.models import StockMovement
 from Inventory.services import record_stock_movement
@@ -8,13 +8,13 @@ from .forms import ProductionBatchForm
 from .models import ProductionBatch
 
 
-@login_required
+@role_required(*ROLE_ACCESS['production'])
 def production_history(request):
 	batches = ProductionBatch.objects.select_related('product', 'recorded_by')
 	return render(request, 'production/production_history.html', {'batches': batches})
 
 
-@login_required
+@role_required(*ROLE_ACCESS['production'])
 def production_batch_add(request):
 	if request.method == 'POST':
 		form = ProductionBatchForm(request.POST)

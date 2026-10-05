@@ -1,10 +1,16 @@
 {% extends 'base.html' %}
 {% block title %}Reports{% endblock %}
+{% block page_heading %}Reports{% endblock %}
 {% block content %}
-<h1>Reports</h1>
-<p>Sales total: {{ sales_total }} | Payments: {{ payment_total }} | Units produced: {{ production_total }}</p>
-<h2>Inventory report</h2><ul>{% for stock_item in stock %}<li>{{ stock_item.product }}: {{ stock_item.quantity_on_hand }}</li>{% empty %}<li>No stock records.</li>{% endfor %}</ul>
-<h2>Payment report</h2><p>Completed payments received: {{ payment_total }}</p>
-<h2>Delivery report</h2><ul>{% for delivery in deliveries %}<li>{{ delivery.order.order_number }} - {{ delivery.get_status_display }} - {{ delivery.scheduled_date }}</li>{% empty %}<li>No deliveries.</li>{% endfor %}</ul>
-<h2>Recent inventory movements</h2><ul>{% for movement in inventory_movements %}<li>{{ movement.created_at }}: {{ movement.get_movement_type_display }} - {{ movement.product }} x {{ movement.quantity }}</li>{% empty %}<li>No movements.</li>{% endfor %}</ul>
+<header class="page-heading"><div><span class="page-kicker">Business summary</span><h1>Reports</h1><p>Review sales, collections, production, stock, and delivery activity.</p></div></header>
+<section class="metric-grid" aria-label="Report totals">
+	<article class="metric"><span class="metric-label">Sales total</span><strong class="metric-value">GH₵{{ sales_total|floatformat:2 }}</strong><span class="metric-foot">Excluding cancelled orders</span></article>
+	<article class="metric"><span class="metric-label">Payments received</span><strong class="metric-value">GH₵{{ payment_total|floatformat:2 }}</strong><span class="metric-foot">Completed payments</span></article>
+	<article class="metric"><span class="metric-label">Units produced</span><strong class="metric-value">{{ production_total }}</strong><span class="metric-foot">Recorded production batches</span></article>
+</section>
+<div class="report-grid">
+	<section class="section-block"><h2 class="section-title">Inventory <small>On hand</small></h2><div class="table-panel"><div class="table-wrap"><table><thead><tr><th>Product</th><th>Available</th></tr></thead><tbody>{% for stock_item in stock %}<tr><td>{{ stock_item.product }}</td><td>{{ stock_item.quantity_on_hand }}</td></tr>{% empty %}<tr><td colspan="2" class="empty-state">No stock records.</td></tr>{% endfor %}</tbody></table></div></div></section>
+	<section class="section-block"><h2 class="section-title">Deliveries <small>Scheduled activity</small></h2><div class="table-panel"><div class="table-wrap"><table><thead><tr><th>Order</th><th>Status</th><th>Scheduled</th></tr></thead><tbody>{% for delivery in deliveries %}<tr><td>{{ delivery.order.order_number }}</td><td><span class="status-tag status-{{ delivery.status|slugify }}">{{ delivery.get_status_display }}</span></td><td>{{ delivery.scheduled_date|date:"M j, Y" }}</td></tr>{% empty %}<tr><td colspan="3" class="empty-state">No deliveries recorded.</td></tr>{% endfor %}</tbody></table></div></div></section>
+</div>
+<section class="section-block"><h2 class="section-title">Recent inventory movements <small>Latest 20 records</small></h2><div class="table-panel"><div class="table-wrap"><table><thead><tr><th>Recorded</th><th>Movement</th><th>Product</th><th>Quantity</th></tr></thead><tbody>{% for movement in inventory_movements %}<tr><td>{{ movement.created_at|date:"M j, Y H:i" }}</td><td>{{ movement.get_movement_type_display }}</td><td>{{ movement.product }}</td><td>{{ movement.quantity }}</td></tr>{% empty %}<tr><td colspan="4" class="empty-state">No inventory movements recorded.</td></tr>{% endfor %}</tbody></table></div></div></section>
 {% endblock %}

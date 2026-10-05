@@ -1,11 +1,11 @@
-from django.contrib.auth.decorators import login_required
 from django.shortcuts import redirect, render
+from accounts.permissions import ROLE_ACCESS, role_required
 
 from .forms import ExpenseCategoryForm, ExpenseForm
 from .models import Expense, ExpenseCategory
 
 
-@login_required
+@role_required(*ROLE_ACCESS['expenses'])
 def expense_list(request):
 	return render(request, 'expenses/expense_list.html', {
 		'expenses': Expense.objects.select_related('category', 'recorded_by'),
@@ -13,7 +13,7 @@ def expense_list(request):
 	})
 
 
-@login_required
+@role_required(*ROLE_ACCESS['expenses'])
 def expense_create(request):
 	form = ExpenseForm(request.POST or None)
 	if form.is_valid():
@@ -24,7 +24,7 @@ def expense_create(request):
 	return render(request, 'expenses/expense_form.html', {'form': form})
 
 
-@login_required
+@role_required(*ROLE_ACCESS['expenses'])
 def category_create(request):
 	form = ExpenseCategoryForm(request.POST or None)
 	if form.is_valid():

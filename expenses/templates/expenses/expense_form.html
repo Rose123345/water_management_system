@@ -1,3 +1,7 @@
 {% extends 'base.html' %}
 {% block title %}Record Expense{% endblock %}
-{% block content %}<h1>Record expense</h1><form method="post">{% csrf_token %}{{ form.as_p }}<button type="submit">Save expense</button></form>{% endblock %}
+{% block page_heading %}Expenses{% endblock %}
+{% block content %}
+<header class="page-heading"><div><span class="page-kicker">Finance</span><h1>Record expense</h1><p>Capture the amount, category, and date for this expense.</p></div></header>
+<div class="form-shell entry-form"><form method="post">{% csrf_token %}{{ form.as_p }}<div class="form-actions"><button type="submit">Save expense</button><a href="{% url 'expenses:list' %}">Cancel</a></div></form></div>
+{% endblock %}

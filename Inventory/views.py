@@ -1,16 +1,16 @@
 from django.contrib import messages
-from django.contrib.auth.decorators import login_required
 from django.core.exceptions import ValidationError
-from django.db.models import F, Q, Value
+from django.db.models import F, Q, Sum, Value
 from django.db.models.functions import Coalesce
 from django.shortcuts import redirect, render
+from accounts.permissions import ROLE_ACCESS, role_required
 from products.models import Product
 from .forms import StockMovementForm
 from .models import StockMovement
 from .services import record_stock_movement
 
 
-@login_required
+@role_required(*ROLE_ACCESS['inventory'])
 def stock_dashboard(request):
 	products = Product.objects.annotate(
 		stock_quantity=Coalesce('stock__quantity_on_hand', Value(0)),
@@ -24,11 +24,14 @@ def stock_dashboard(request):
 	return render(request, 'Inventory/stock_dashboard.html', {
 		'products': products,
 		'low_stock_products': low_stock_products,
+		'product_count': products.count(),
+		'units_on_hand': products.aggregate(total=Sum('stock_quantity'))['total'] or 0,
+		'low_stock_count': low_stock_products.count(),
 		'movements': movements,
 	})
 
 
-@login_required
+@role_required(*ROLE_ACCESS['inventory'])
 def stock_movement_add(request):
 	if request.method == 'POST':
 		form = StockMovementForm(request.POST)

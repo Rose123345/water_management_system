@@ -1,11 +1,11 @@
-from django.contrib.auth.decorators import login_required
 from django.shortcuts import get_object_or_404, redirect, render
+from accounts.permissions import ROLE_ACCESS, role_required
 
 from .forms import DeliveryForm
 from .models import Delivery
 
 
-@login_required
+@role_required(*ROLE_ACCESS['distribution'])
 def delivery_list(request):
 	deliveries = Delivery.objects.select_related('order__customer', 'assigned_to')
 	status = request.GET.get('status')
@@ -16,7 +16,7 @@ def delivery_list(request):
 	})
 
 
-@login_required
+@role_required(*ROLE_ACCESS['distribution'])
 def delivery_create(request):
 	form = DeliveryForm(request.POST or None)
 	if form.is_valid():
@@ -25,7 +25,7 @@ def delivery_create(request):
 	return render(request, 'distribution/delivery_form.html', {'form': form})
 
 
-@login_required
+@role_required(*ROLE_ACCESS['distribution'])
 def delivery_edit(request, pk):
 	delivery = get_object_or_404(Delivery, pk=pk)
 	form = DeliveryForm(request.POST or None, instance=delivery)

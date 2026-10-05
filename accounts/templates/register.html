@@ -1,11 +1,76 @@
 {% extends 'base.html' %}
 {% block title %}Register{% endblock %}
+{% block page_heading %}Create account{% endblock %}
 {% block content %}
-<h2>Register</h2>
-<form method="post">
-  {% csrf_token %}
-  {{ form.as_p }}
-  <button type="submit">Create account</button>
-</form>
-<p>Already have an account? <a href="{% url 'accounts:login' %}">Login</a></p>
+<style>
+  .register-page { display: grid; grid-template-columns: minmax(220px, .78fr) minmax(0, 1.22fr); width: 100%; max-width: 900px; margin: auto; overflow: hidden; border: 1px solid var(--line); border-radius: 5px; background: var(--surface); box-shadow: var(--shadow); }
+  .register-intro { display: flex; min-height: 100%; flex-direction: column; padding: 32px 28px; background: var(--green-deep); color: white; }
+  .register-emblem { display: grid; width: 48px; height: 48px; place-items: center; border: 1px solid rgb(255 255 255 / 19%); border-radius: 12px 12px 12px 4px; background: var(--green-mid); color: #e5c78c; }
+  .register-emblem svg { width: 25px; height: 25px; fill: none; stroke: currentColor; stroke-width: 1.7; stroke-linecap: round; stroke-linejoin: round; }
+  .register-kicker { margin-top: 26px; color: #e5c78c; font-size: 10px; font-weight: 800; text-transform: uppercase; }
+  .register-intro h1 { margin-top: 8px; color: white; font-size: 27px; line-height: 1.2; }
+  .register-intro > p { margin: 12px 0 0; color: #d2e0d6; font-size: 13px; line-height: 1.7; }
+  .register-access-note { display: flex; align-items: flex-start; gap: 10px; margin-top: auto; padding-top: 24px; color: #c0d2c5; font-size: 11px; line-height: 1.6; }
+  .register-access-note svg { width: 17px; height: 17px; flex: none; margin-top: 1px; fill: none; stroke: #e5c78c; stroke-width: 1.7; stroke-linecap: round; stroke-linejoin: round; }
+  .register-form-area { min-width: 0; padding: 29px 30px; }
+  .register-form-heading { display: flex; align-items: baseline; justify-content: space-between; gap: 12px; margin-bottom: 20px; }
+  .register-form-heading h2 { margin: 0; font-size: 18px; }
+  .register-required { color: var(--muted); font-size: 10px; }
+  .register-form { max-width: none; }
+  .register-field { margin: 0 0 15px; }
+  .register-field label { display: flex; align-items: center; gap: 8px; margin-bottom: 7px; color: var(--ink); font-size: 12px; }
+  .register-field label svg { width: 16px; height: 16px; fill: none; stroke: var(--green); stroke-width: 1.7; stroke-linecap: round; stroke-linejoin: round; }
+  .register-field input { max-width: none; background: #fbfcfa; }
+  .register-help { margin: 7px 0 0; color: var(--muted); font-size: 10px; line-height: 1.55; }
+  .register-help ul { display: grid; gap: 3px; margin: 5px 0 0; padding-left: 17px; }
+  .register-errors { margin: 0 0 14px; padding: 10px 12px; border-left: 3px solid var(--danger); background: var(--danger-soft); color: var(--danger); font-size: 11px; }
+  .register-field-error { display: block; margin-top: 6px; color: var(--danger); font-size: 11px; }
+  .register-submit { display: flex; width: 100%; align-items: center; justify-content: center; gap: 9px; margin-top: 20px; }
+  .register-submit svg { width: 17px; height: 17px; fill: none; stroke: currentColor; stroke-width: 1.8; stroke-linecap: round; stroke-linejoin: round; }
+  .register-login { margin: 17px 0 0; color: var(--muted); font-size: 12px; text-align: center; }
+  @media (max-width: 700px) {
+    .register-page { grid-template-columns: minmax(0, 1fr); max-width: 540px; }
+    .register-intro { min-height: auto; padding: 22px 23px; }
+    .register-kicker { margin-top: 16px; }
+    .register-intro h1 { font-size: 24px; }
+    .register-intro > p { margin-top: 7px; }
+    .register-access-note { margin-top: 13px; padding-top: 0; }
+    .register-form-area { padding: 22px 23px 24px; }
+  }
+  @media (max-width: 420px) {
+    .register-intro { padding: 19px 18px; }
+    .register-form-area { padding: 20px 18px 22px; }
+    .register-form-heading { align-items: flex-start; flex-direction: column; gap: 4px; }
+  }
+</style>
+<section class="register-page" aria-labelledby="register-title">
+  <aside class="register-intro">
+    <span class="register-emblem" aria-hidden="true"><svg viewBox="0 0 24 24"><circle cx="9" cy="8" r="3.5"/><path d="M3.5 20a5.5 5.5 0 0 1 11 0M17 8v6m-3-3h6"/></svg></span>
+    <span class="register-kicker">WMDMS account</span>
+    <h1 id="register-title">Create your account.</h1>
+    <p>Set up your sign-in details to get started with WMDMS.</p>
+    <div class="register-access-note"><svg aria-hidden="true" viewBox="0 0 24 24"><rect x="4" y="10" width="16" height="11" rx="2"/><path d="M8 10V7a4 4 0 0 1 8 0v3"/></svg><span>New accounts need administrator role assignment before operational pages become available.</span></div>
+  </aside>
+  <div class="register-form-area">
+    <div class="register-form-heading"><h2>Account details</h2><span class="register-required">All fields are required</span></div>
+    <form class="register-form" method="post">
+      {% csrf_token %}
+      {% if form.non_field_errors %}<div class="register-errors" role="alert">{{ form.non_field_errors }}</div>{% endif %}
+      {% for field in form %}
+        <p class="register-field">
+          <label for="{{ field.id_for_label }}">
+            {% if field.name == 'username' %}<svg aria-hidden="true" viewBox="0 0 24 24"><circle cx="12" cy="8" r="3.5"/><path d="M5 20a7 7 0 0 1 14 0"/></svg>
+            {% else %}<svg aria-hidden="true" viewBox="0 0 24 24"><rect x="4" y="10" width="16" height="11" rx="2"/><path d="M8 10V7a4 4 0 0 1 8 0v3"/></svg>{% endif %}
+            {{ field.label }}
+          </label>
+          {{ field }}
+          {% if field.help_text %}<span class="register-help">{{ field.help_text|safe }}</span>{% endif %}
+          {% for error in field.errors %}<span class="register-field-error" role="alert">{{ error }}</span>{% endfor %}
+        </p>
+      {% endfor %}
+      <button class="register-submit" type="submit"><svg aria-hidden="true" viewBox="0 0 24 24"><path d="M16 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2m6-10a4 4 0 1 0 0-8 4 4 0 0 0 0 8Zm9-1v6m-3-3h6"/></svg>Create account</button>
+    </form>
+    <p class="register-login">Already have an account? <a href="{% url 'accounts:login' %}">Log in</a></p>
+  </div>
+</section>
 {% endblock %}

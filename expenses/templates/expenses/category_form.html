@@ -1,0 +1,7 @@
+{% extends 'base.html' %}
+{% block title %}Add Expense Category{% endblock %}
+{% block page_heading %}Expenses{% endblock %}
+{% block content %}
+<header class="page-heading"><div><span class="page-kicker">Finance</span><h1>Add expense category</h1><p>Create a category for consistent expense reporting.</p></div></header>
+<div class="form-shell"><form method="post">{% csrf_token %}{{ form.as_p }}<div class="form-actions"><button type="submit">Save category</button><a href="{% url 'expenses:list' %}">Cancel</a></div></form></div>
+{% endblock %}

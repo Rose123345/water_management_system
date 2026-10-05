@@ -1,3 +1,7 @@
 {% extends 'base.html' %}
 {% block title %}Delivery{% endblock %}
-{% block content %}<h1>Delivery</h1><form method="post">{% csrf_token %}{{ form.as_p }}<button type="submit">Save delivery</button></form>{% endblock %}
+{% block page_heading %}Deliveries{% endblock %}
+{% block content %}
+<header class="page-heading"><div><span class="page-kicker">Distribution</span><h1>{% if delivery %}Update delivery{% else %}Assign delivery{% endif %}</h1><p>Choose an order, set the delivery details, and assign its current status.</p></div></header>
+<div class="form-shell entry-form"><form method="post">{% csrf_token %}{{ form.as_p }}<div class="form-actions"><button type="submit">Save delivery</button><a href="{% url 'distribution:list' %}">Cancel</a></div></form></div>
+{% endblock %}

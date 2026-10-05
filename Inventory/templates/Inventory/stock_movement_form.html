@@ -1,11 +1,13 @@
 {% extends 'base.html' %}
 {% block title %}Record Stock Movement{% endblock %}
+{% block page_heading %}Inventory{% endblock %}
 {% block content %}
-<h1>Record Stock Movement</h1>
+<header class="page-heading"><div><span class="page-kicker">Stock control</span><h1>Record stock movement</h1><p>Record a receipt or issue to keep available quantities accurate.</p></div></header>
+<div class="form-shell entry-form">
 <form method="post">
   {% csrf_token %}
   {{ form.as_p }}
-  <button type="submit">Save movement</button>
-  <a href="{% url 'inventory:list' %}">Cancel</a>
+  <div class="form-actions"><button type="submit">Save movement</button><a href="{% url 'inventory:list' %}">Cancel</a></div>
 </form>
+</div>
 {% endblock %}

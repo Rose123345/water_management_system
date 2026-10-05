@@ -1,9 +1,43 @@
 {% extends 'base.html' %}
 {% block title %}Dashboard{% endblock %}
+{% block page_heading %}Operations overview{% endblock %}
 {% block content %}
-<h1>Dashboard</h1>
-<p>Orders: {{ order_count }} | Payments received: {{ payment_total }} | Units produced: {{ production_total }}</p>
-<h2>Recent orders</h2><ul>{% for order in recent_orders %}<li><a href="{% url 'sales:detail' order.pk %}">{{ order.order_number }}</a> - {{ order.customer }} - {{ order.get_status_display }}</li>{% empty %}<li>No orders yet.</li>{% endfor %}</ul>
-<h2>Low stock</h2><ul>{% for stock in low_stock %}<li>{{ stock.product }}: {{ stock.quantity_on_hand }}</li>{% empty %}<li>No low-stock products.</li>{% endfor %}</ul>
-<h2>Pending deliveries</h2><ul>{% for delivery in pending_deliveries %}<li>{{ delivery.order.order_number }} - {{ delivery.get_status_display }}</li>{% empty %}<li>No pending deliveries.</li>{% endfor %}</ul>
+<header class="page-heading">
+	<div><span class="page-kicker">Operations</span><h1>Operations overview</h1><p>Monitor orders, cash received, production, and the items needing attention.</p></div>
+	<div class="page-actions">{% for item in workspace_navigation %}{% if item.label == 'Reports' %}<a class="action-link" href="{{ item.path }}">View reports</a>{% endif %}{% endfor %}</div>
+</header>
+
+<section class="metric-grid" aria-label="Operational summary">
+	<article class="metric"><span class="metric-label">Total orders</span><strong class="metric-value">{{ order_count }}</strong><span class="metric-foot">Across all order stages</span></article>
+	<article class="metric"><span class="metric-label">Payments received</span><strong class="metric-value">GH₵{{ payment_total|floatformat:2 }}</strong><span class="metric-foot">Completed payments</span></article>
+	<article class="metric"><span class="metric-label">Units produced</span><strong class="metric-value">{{ production_total }}</strong><span class="metric-foot">Recorded production</span></article>
+	<article class="metric"><span class="metric-label">Deliveries in progress</span><strong class="metric-value">{{ pending_delivery_count }}</strong><span class="metric-foot">Not yet delivered</span></article>
+</section>
+
+<div class="workspace-grid">
+	<section class="content-panel" aria-labelledby="recent-orders-title">
+		<div class="panel-heading"><h2 id="recent-orders-title">Recent orders</h2><a href="{% url 'sales:list' %}">All orders <span aria-hidden="true">→</span></a></div>
+		<div class="table-wrap">
+			<table>
+				<thead><tr><th>Order</th><th>Customer</th><th>Status</th><th>Total</th></tr></thead>
+				<tbody>
+					{% for order in recent_orders %}
+					<tr><td><a href="{% url 'sales:detail' order.pk %}">{{ order.order_number }}</a></td><td>{{ order.customer }}</td><td><span class="status-tag status-{{ order.status|slugify }}">{{ order.get_status_display }}</span></td><td>GH₵{{ order.total|floatformat:2 }}</td></tr>
+					{% empty %}<tr><td colspan="4" class="empty-state">No orders have been created yet.</td></tr>{% endfor %}
+				</tbody>
+			</table>
+		</div>
+	</section>
+
+	<aside class="content-panel dashboard-side" aria-label="Items needing attention">
+		<section class="panel-content watch-group">
+			<h2 class="watch-title">Low stock <span class="watch-count">{{ low_stock_count }} items</span></h2>
+			{% if low_stock %}<ul class="watch-list">{% for stock in low_stock|slice:":5" %}<li><a href="{% url 'inventory:list' %}">{{ stock.product }}</a><span class="watch-meta">{{ stock.quantity_on_hand }} left</span></li>{% endfor %}</ul>{% else %}<p class="empty-state">All products are above their reorder levels.</p>{% endif %}
+		</section>
+		<section class="panel-content watch-group">
+			<h2 class="watch-title">Pending deliveries <span class="watch-count">{{ pending_delivery_count }} open</span></h2>
+			{% if pending_deliveries %}<ul class="watch-list">{% for delivery in pending_deliveries %}<li><a href="{% url 'distribution:list' %}">{{ delivery.order.order_number }}</a><span class="watch-meta">{{ delivery.get_status_display }}</span></li>{% endfor %}</ul>{% else %}<p class="empty-state">No deliveries are waiting.</p>{% endif %}
+		</section>
+	</aside>
+</div>
 {% endblock %}

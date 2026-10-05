@@ -1,13 +1,8 @@
-from django.shortcuts import render
 from django.shortcuts import render, redirect, get_object_or_404
-from django.contrib.auth.decorators import login_required
 from django.contrib import messages
+from accounts.permissions import ROLE_ACCESS, in_groups, role_required
 from .models import Product
 from .forms import ProductForm
-
-
-def in_groups(user, group_names):
-    return user.groups.filter(name__in=group_names).exists() or user.is_superuser
 
 
 def public_product_list(request):
@@ -28,7 +23,7 @@ def public_product_list(request):
     })
 
 
-@login_required
+@role_required(*ROLE_ACCESS['products'])
 def product_list(request):
     query = request.GET.get('q', '')
     products = Product.objects.all()
@@ -40,7 +35,7 @@ def product_list(request):
     })
 
 
-@login_required
+@role_required('Administrator')
 def product_add(request):
     if not in_groups(request.user, ['Administrator']):
         messages.error(request, "You don't have permission to add products.")
@@ -59,7 +54,7 @@ def product_add(request):
     return render(request, 'products/product_form.html', {'form': form, 'title': 'Add Product'})
 
 
-@login_required
+@role_required('Administrator')
 def product_edit(request, pk):
     if not in_groups(request.user, ['Administrator']):
         messages.error(request, "You don't have permission to edit products.")
@@ -77,13 +72,13 @@ def product_edit(request, pk):
     return render(request, 'products/product_form.html', {'form': form, 'title': 'Edit Product'})
 
 
-@login_required
+@role_required(*ROLE_ACCESS['products'])
 def product_detail(request, pk):
     product = get_object_or_404(Product, pk=pk)
     return render(request, 'products/product_detail.html', {'product': product})
 
 
-@login_required
+@role_required('Administrator')
 def product_deactivate(request, pk):
     if not in_groups(request.user, ['Administrator']):
         messages.error(request, "You don't have permission to deactivate products.")
@@ -98,7 +93,7 @@ def product_deactivate(request, pk):
     return render(request, 'products/product_confirm_deactivate.html', {'product': product})
 
 
-@login_required
+@role_required('Administrator')
 def product_activate(request, pk):
     if not in_groups(request.user, ['Administrator']):
         messages.error(request, "You don't have permission to activate products.")

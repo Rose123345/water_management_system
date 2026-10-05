@@ -1,11 +1,13 @@
 {% extends 'base.html' %}
 {% block title %}{{ title }}{% endblock %}
+{% block page_heading %}Customers{% endblock %}
 {% block content %}
-<h2>{{ title }}</h2>
+<header class="page-heading"><div><span class="page-kicker">Customer records</span><h1>{{ title }}</h1><p>Enter accurate contact details for this customer.</p></div></header>
+<div class="form-shell entry-form">
 <form method="post">
   {% csrf_token %}
   {{ form.as_p }}
-  <button type="submit">Save</button>
-  <a href="{% url 'customers:list' %}">Cancel</a>
+  <div class="form-actions"><button type="submit">Save customer</button><a href="{% url 'customers:list' %}">Cancel</a></div>
 </form>
+</div>
 {% endblock %}

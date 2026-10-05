@@ -1,12 +1,12 @@
 
 from django.shortcuts import render, redirect, get_object_or_404
-from django.contrib.auth.decorators import login_required
 from django.contrib import messages
+from accounts.permissions import ROLE_ACCESS, role_required
 from .models import Customer
 from .forms import CustomerForm
 
 
-@login_required
+@role_required(*ROLE_ACCESS['customers'])
 def customer_list(request):
     query = request.GET.get('q', '')
     customers = Customer.objects.all()
@@ -17,7 +17,7 @@ def customer_list(request):
     })
 
 
-@login_required
+@role_required(*ROLE_ACCESS['customers'])
 def customer_add(request):
     if request.method == 'POST':
         form = CustomerForm(request.POST)
@@ -32,7 +32,7 @@ def customer_add(request):
     return render(request, 'customer_form.html', {'form': form, 'title': 'Add Customer'})
 
 
-@login_required
+@role_required(*ROLE_ACCESS['customers'])
 def customer_edit(request, pk):
     customer = get_object_or_404(Customer, pk=pk)
     if request.method == 'POST':
@@ -46,13 +46,13 @@ def customer_edit(request, pk):
     return render(request, 'customer_form.html', {'form': form, 'title': 'Edit Customer'})
 
 
-@login_required
+@role_required(*ROLE_ACCESS['customers'])
 def customer_detail(request, pk):
     customer = get_object_or_404(Customer, pk=pk)
     return render(request, 'customer_detail.html', {'customer': customer})
 
 
-@login_required
+@role_required(*ROLE_ACCESS['customers'])
 def customer_deactivate(request, pk):
     customer = get_object_or_404(Customer, pk=pk)
     if request.method == 'POST':
@@ -63,7 +63,7 @@ def customer_deactivate(request, pk):
     return render(request, 'customer_confirm_deactivate.html', {'customer': customer})
 
 
-@login_required
+@role_required(*ROLE_ACCESS['customers'])
 def customer_activate(request, pk):
     customer = get_object_or_404(Customer, pk=pk)
     customer.status = Customer.Status.ACTIVE

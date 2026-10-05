@@ -1,24 +1,18 @@
 from django.shortcuts import render, redirect, get_object_or_404
-from django.contrib.auth.decorators import login_required
 from django.contrib import messages
 from django.core.exceptions import ValidationError
 from django.db import transaction
 from django.views.decorators.http import require_POST
-from accounts.permissions import in_groups
+from accounts.permissions import ROLE_ACCESS, in_groups, role_required
 from .models import Order
 from .forms import OrderForm, OrderItemFormSet
 from .services import advance_order_status, cancel_order, OrderStatusError
 
-VIEW_ROLES = ['Administrator', 'Sales Officer', 'Accountant']
 MANAGE_ROLES = ['Administrator', 'Sales Officer']
 
 
-@login_required
+@role_required(*ROLE_ACCESS['sales'])
 def order_list(request):
-    if not in_groups(request.user, VIEW_ROLES):
-        messages.error(request, "You don't have permission to view orders.")
-        return redirect('customers:list')
-
     orders = Order.objects.select_related('customer')
     status = request.GET.get('status')
     if status:
@@ -32,7 +26,7 @@ def order_list(request):
     })
 
 
-@login_required
+@role_required(*ROLE_ACCESS['sales'])
 def order_add(request):
     if not in_groups(request.user, MANAGE_ROLES):
         messages.error(request, "You don't have permission to create orders.")
@@ -57,12 +51,8 @@ def order_add(request):
     return render(request, 'sales/order_form.html', {'form': form, 'formset': formset})
 
 
-@login_required
+@role_required(*ROLE_ACCESS['sales'])
 def order_detail(request, pk):
-    if not in_groups(request.user, VIEW_ROLES):
-        messages.error(request, "You don't have permission to view orders.")
-        return redirect('customers:list')
-
     order = get_object_or_404(Order.objects.select_related('customer', 'created_by'), pk=pk)
     return render(request, 'sales/order_detail.html', {
         'order': order,
@@ -71,7 +61,7 @@ def order_detail(request, pk):
     })
 
 
-@login_required
+@role_required(*ROLE_ACCESS['sales'])
 @require_POST
 def order_advance(request, pk):
     if not in_groups(request.user, MANAGE_ROLES):
@@ -88,7 +78,7 @@ def order_advance(request, pk):
     return redirect('sales:detail', pk=pk)
 
 
-@login_required
+@role_required(*ROLE_ACCESS['sales'])
 @require_POST
 def order_cancel(request, pk):
     if not in_groups(request.user, MANAGE_ROLES):

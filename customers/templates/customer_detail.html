@@ -1,13 +1,14 @@
 {% extends 'base.html' %}
 {% block title %}{{ customer.name }}{% endblock %}
+{% block page_heading %}Customer record{% endblock %}
 {% block content %}
-<h2>{{ customer.name }}</h2>
-<p><strong>Type:</strong> {{ customer.get_customer_type_display }}</p>
-<p><strong>Phone:</strong> {{ customer.phone }}</p>
-<p><strong>Email:</strong> {{ customer.email|default:"-" }}</p>
-<p><strong>Address:</strong> {{ customer.address|default:"-" }}</p>
-<p><strong>Status:</strong> {{ customer.get_status_display }}</p>
-<p><strong>Registered:</strong> {{ customer.created_at }}</p>
-<a href="{% url 'customers:edit' customer.pk %}">Edit</a> |
-<a href="{% url 'customers:list' %}">Back to list</a>
+<header class="page-heading"><div><span class="page-kicker">Customer profile</span><h1>{{ customer.name }}</h1><p>Registered {{ customer.created_at|date:"M j, Y" }}</p></div><div class="page-actions"><a class="action-link primary" href="{% url 'customers:edit' customer.pk %}">Edit customer</a></div></header>
+<div class="detail-grid">
+	<div class="detail-item"><span class="detail-label">Customer type</span><span class="detail-value">{{ customer.get_customer_type_display }}</span></div>
+	<div class="detail-item"><span class="detail-label">Status</span><span class="status-tag status-{{ customer.status|slugify }}">{{ customer.get_status_display }}</span></div>
+	<div class="detail-item"><span class="detail-label">Phone</span><span class="detail-value">{{ customer.phone|default:"-" }}</span></div>
+	<div class="detail-item"><span class="detail-label">Email</span><span class="detail-value">{{ customer.email|default:"-" }}</span></div>
+	<div class="detail-item"><span class="detail-label">Address</span><span class="detail-value">{{ customer.address|default:"-" }}</span></div>
+</div>
+<div class="detail-actions"><a class="action-link" href="{% url 'customers:list' %}">Back to customers</a></div>
 {% endblock %}

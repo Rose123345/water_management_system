@@ -1,11 +1,13 @@
 {% extends 'base.html' %}
 {% block title %}Record Production{% endblock %}
+{% block page_heading %}Production{% endblock %}
 {% block content %}
-<h1>Record Production Batch</h1>
+<header class="page-heading"><div><span class="page-kicker">Manufacturing</span><h1>Record production batch</h1><p>Saving a batch also records the finished stock movement.</p></div></header>
+<div class="form-shell entry-form">
 <form method="post">
   {% csrf_token %}
   {{ form.as_p }}
-  <button type="submit">Save batch</button>
-  <a href="{% url 'production:list' %}">Cancel</a>
+  <div class="form-actions"><button type="submit">Save batch</button><a href="{% url 'production:list' %}">Cancel</a></div>
 </form>
+</div>
 {% endblock %}

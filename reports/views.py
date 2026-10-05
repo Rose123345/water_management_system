@@ -1,6 +1,6 @@
-from django.contrib.auth.decorators import login_required
 from django.db.models import Sum
 from django.shortcuts import render
+from accounts.permissions import ROLE_ACCESS, role_required
 
 from Inventory.models import Stock, StockMovement
 from distribution.models import Delivery
@@ -9,7 +9,7 @@ from production.models import ProductionBatch
 from sales.models import Order
 
 
-@login_required
+@role_required(*ROLE_ACCESS['reports'])
 def report_index(request):
     orders = Order.objects.exclude(status=Order.Status.CANCELLED).prefetch_related('items')
     sales_total = sum(order.total for order in orders)

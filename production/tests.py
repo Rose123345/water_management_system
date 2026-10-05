@@ -1,5 +1,6 @@
 from django.test import TestCase
 from django.contrib.auth import get_user_model
+from django.contrib.auth.models import Group
 from django.urls import reverse
 from Inventory.models import Stock, StockMovement
 from products.models import Product
@@ -12,6 +13,7 @@ class ProductionBatchTests(TestCase):
 			username='production-test-user',
 			password='test-password',
 		)
+		self.user.groups.add(Group.objects.create(name='Production Officer'))
 		self.product = Product.objects.create(
 			name='Test Water',
 			product_type=Product.ProductType.BOTTLED,

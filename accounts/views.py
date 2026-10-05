@@ -3,6 +3,7 @@ from django.contrib.auth import authenticate, login as auth_login, logout as aut
 from django.contrib.auth.forms import UserCreationForm
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
+from django.utils.http import url_has_allowed_host_and_scheme
 
 
 def login(request):
@@ -13,7 +14,11 @@ def login(request):
         user = authenticate(request, username=username, password=password)
         if user is not None:
             auth_login(request, user)
-            return redirect(next_url or 'products:list')
+            if next_url and url_has_allowed_host_and_scheme(
+                next_url, allowed_hosts={request.get_host()}, require_https=request.is_secure()
+            ):
+                return redirect(next_url)
+            return redirect('dashboard:home')
         else:
             messages.error(request, 'Invalid username or password.')
 
@@ -31,10 +36,12 @@ def register(request):
     if request.method == 'POST':
         form = UserCreationForm(request.POST)
         if form.is_valid():
-            user = form.save()
-            auth_login(request, user)
-            messages.success(request, 'Account created successfully.')
-            return redirect('customers:list')
+            form.save()
+            messages.success(
+                request,
+                'Account created. A system administrator must assign your role before you can access the workspace.',
+            )
+            return redirect('accounts:login')
     else:
         form = UserCreationForm()
 

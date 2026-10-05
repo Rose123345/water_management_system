@@ -1,53 +1,80 @@
 {% extends 'public_base.html' %}
+{% load static %}
 {% block title %}Contact | WMDMS{% endblock %}
 {% block styles %}
 <style>
-  .contact-layout { display: grid; grid-template-columns: .82fr 1.18fr; max-width: 1100px; margin: 0 auto; padding: 58px 34px 78px; gap: 60px; }
-  .contact-copy { padding-top: 10px; }
-  .eyebrow { color: var(--green); font-size: 12px; font-weight: 700; text-transform: uppercase; }
-  h1 { margin: 13px 0 16px; font: 800 42px/1.15 'Manrope', sans-serif; letter-spacing: 0; }
-  .contact-copy > p { margin: 0; color: var(--muted); font-size: 15px; line-height: 1.75; }
-  .contact-note { margin-top: 27px; padding: 15px 17px; border-left: 3px solid var(--coral); background: #eaf1eb; color: var(--muted); font-size: 13px; line-height: 1.65; }
-  .contact-form { padding: 24px; border: 1px solid var(--line); border-radius: 4px; background: white; }
-  .contact-form h2 { margin: 0 0 20px; font: 700 18px 'Manrope', sans-serif; }
-  .field { display: grid; gap: 7px; margin-bottom: 15px; }
-  .field label { color: var(--ink); font-size: 12px; font-weight: 700; }
-  .field input, .field textarea { width: 100%; padding: 11px 12px; border: 1px solid #cbd9d0; border-radius: 3px; background: #fcfdfc; color: var(--ink); font: 14px 'DM Sans', sans-serif; }
-  .field input { height: 43px; }
-  .field textarea { min-height: 125px; resize: vertical; line-height: 1.55; }
-  .field input:focus, .field textarea:focus { outline: 2px solid #8eb9a4; outline-offset: 1px; }
-  .field-error { color: #a23c2b; font-size: 12px; }
-  .contact-form button { min-height: 44px; padding: 0 19px; border: 0; border-radius: 4px; background: var(--green); color: white; font: 700 13px 'DM Sans', sans-serif; cursor: pointer; }
+  main { min-height: 0; }
+  .contact-hero { position: relative; display: flex; min-height: 280px; align-items: center; overflow: hidden; isolation: isolate; background: var(--green-deep); color: white; }
+  .contact-hero::before, .contact-hero::after { position: absolute; z-index: -1; inset: 0; content: ''; }
+  .contact-hero::before { background: url("{% static 'dashboard/water-source.jpg' %}") center 67% / cover no-repeat; }
+  .contact-hero::after { background: rgb(10 37 31 / 73%); }
+  .contact-hero-inner { width: min(100%, 1240px); margin: auto; padding: 47px 34px; }
+  .eyebrow { color: #e5c78c; font-size: 10px; font-weight: 800; text-transform: uppercase; }
+  h1 { margin: 13px 0 10px; color: white; font: 800 44px/1.12 'Manrope', sans-serif; letter-spacing: 0; }
+  .contact-hero p { max-width: 590px; margin: 0; color: #e2ebe5; font-size: 14px; line-height: 1.7; }
+  .contact-layout { display: grid; grid-template-columns: minmax(0, 760px); justify-content: center; max-width: 1172px; margin: 0 auto; padding: 34px 34px 64px; }
+  .contact-form { padding: 23px 24px; border: 1px solid var(--line); border-top: 3px solid var(--green); border-radius: 4px; background: white; box-shadow: 0 8px 25px rgb(24 58 48 / 5%); }
+  .form-heading { display: flex; align-items: start; justify-content: space-between; gap: 18px; margin-bottom: 19px; }
+  .contact-form h2 { margin: 0; color: var(--ink); font: 700 18px 'Manrope', sans-serif; }
+  .sr-only { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0, 0, 0, 0); white-space: nowrap; clip-path: inset(50%); }
+  .field { margin-bottom: 14px; }
+  .field-control { display: flex; min-height: 48px; align-items: center; gap: 11px; padding: 0 12px; border: 1px solid #cbd6cc; border-radius: 4px; background: #fbfcfa; transition: border-color .16s ease, box-shadow .16s ease; }
+  .field-control:focus-within { border-color: var(--green); box-shadow: 0 0 0 3px rgb(40 107 89 / 13%); }
+  .field-icon { display: grid; width: 18px; height: 18px; flex: none; place-items: center; color: var(--green); }
+  .field-icon svg { width: 18px; height: 18px; fill: none; stroke: currentColor; stroke-width: 1.7; stroke-linecap: round; stroke-linejoin: round; }
+  .field-control input, .field-control textarea { width: 100%; min-width: 0; min-height: 46px; padding: 10px 0; border: 0; outline: 0; background: transparent; color: var(--ink); font: 14px 'DM Sans', sans-serif; }
+  .field-control textarea { min-height: 125px; resize: vertical; line-height: 1.55; }
+  .field-control.message-control { align-items: flex-start; padding-top: 7px; }
+  .message-control .field-icon { margin-top: 11px; }
+  .field-control input::placeholder, .field-control textarea::placeholder { color: #74867a; opacity: 1; }
+  .field-error { color: #a23c2b; font-size: 11px; }
+  .form-errors { margin: 0 0 14px; padding: 11px 13px; border-left: 3px solid #a23c2b; background: #fcebe6; color: #8f3528; font-size: 12px; }
+  .contact-form button { display: inline-flex; min-height: 44px; align-items: center; gap: 14px; padding: 0 18px; border: 0; border-radius: 4px; background: var(--green); color: white; font: 700 12px 'DM Sans', sans-serif; cursor: pointer; }
   .contact-form button:hover { background: var(--green-dark); }
-  .form-footnote { display: block; margin-top: 12px; color: var(--muted); font-size: 11px; }
+  .form-footnote { display: block; margin-top: 11px; color: var(--muted); font-size: 10px; line-height: 1.5; }
   @media (max-width: 700px) {
-    .contact-layout { grid-template-columns: 1fr; padding: 42px 20px 58px; gap: 25px; }
-    h1 { font-size: 36px; }
+    .contact-hero { min-height: 245px; }
+    .contact-hero-inner { padding: 40px 20px; }
+    h1 { font-size: 38px; }
+    .contact-layout { grid-template-columns: minmax(0, 1fr); padding: 24px 20px 44px; }
     .contact-form { padding: 19px; }
+  }
+  @media (max-width: 420px) {
+    h1 { font-size: 34px; }
+    .form-heading { flex-direction: column; gap: 5px; }
   }
 </style>
 {% endblock %}
 {% block content %}
-<section class="contact-layout">
-  <div class="contact-copy">
+<section class="contact-hero">
+  <div class="contact-hero-inner">
     <span class="eyebrow">Contact the team</span>
-    <h1>How can we help?</h1>
-    <p>Send a question about our products or the water management system. Your message will be recorded for the team to review.</p>
-    <div class="contact-note">For access to operational tools, please use the Log in link. This form is for general product and system inquiries.</div>
+    <h1>Let's talk water operations.</h1>
+    <p>Send a question about our products or the water management system and the team will review your inquiry.</p>
   </div>
+</section>
+<section class="contact-layout" aria-label="Contact the WMDMS team">
   <form class="contact-form" method="post">
     {% csrf_token %}
     {{ form.website }}
-    <h2>Send an inquiry</h2>
+    <div class="form-heading"><h2>Send an inquiry</h2></div>
+    {% if form.non_field_errors %}<div class="form-errors" role="alert">{{ form.non_field_errors }}</div>{% endif %}
     {% for field in form.visible_fields %}
       <div class="field">
-        <label for="{{ field.id_for_label }}">{{ field.label }}</label>
-        {{ field }}
-        {% for error in field.errors %}<span class="field-error">{{ error }}</span>{% endfor %}
+        <label class="sr-only" for="{{ field.id_for_label }}">{{ field.label }}</label>
+        <div class="field-control{% if field.name == 'message' %} message-control{% endif %}">
+          <span class="field-icon" aria-hidden="true">
+            {% if field.name == 'name' %}<svg viewBox="0 0 24 24"><circle cx="12" cy="8" r="3.5"/><path d="M5 20a7 7 0 0 1 14 0"/></svg>
+            {% elif field.name == 'email' %}<svg viewBox="0 0 24 24"><rect x="3" y="5" width="18" height="14" rx="2"/><path d="m4 7 8 6 8-6"/></svg>
+            {% elif field.name == 'subject' %}<svg viewBox="0 0 24 24"><path d="M4 5h16v12H9l-5 4V5Z"/><path d="M8 9h8m-8 4h5"/></svg>
+            {% else %}<svg viewBox="0 0 24 24"><path d="M4 5h16v12H9l-5 4V5Z"/><path d="M8 9h8m-8 4h6"/></svg>{% endif %}
+          </span>
+          {{ field }}
+        </div>
+        {% for error in field.errors %}<span class="field-error" role="alert">{{ error }}</span>{% endfor %}
       </div>
     {% endfor %}
-    {% for error in form.non_field_errors %}<span class="field-error">{{ error }}</span>{% endfor %}
-    <button type="submit">Send message</button>
+    <button type="submit">Send inquiry</button>
     <span class="form-footnote">Your email address is used only to identify your inquiry.</span>
   </form>
 </section>

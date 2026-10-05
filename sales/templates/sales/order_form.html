@@ -1,11 +1,14 @@
 {% extends 'base.html' %}
 {% block title %}Create Order{% endblock %}
+{% block page_heading %}Sales orders{% endblock %}
 {% block content %}
-<h1>Create Order</h1>
+<header class="page-heading"><div><span class="page-kicker">Sales</span><h1>Create order</h1><p>Select a customer and add one or more products.</p></div></header>
+<div class="form-shell entry-form">
 <form method="post">
   {% csrf_token %}{{ form.as_p }}
   {{ formset.management_form }}
   {% for item_form in formset %}<fieldset>{{ item_form.as_p }}</fieldset>{% endfor %}
-  <button type="submit">Create order</button>
+  <div class="form-actions"><button type="submit">Create order</button><a href="{% url 'sales:list' %}">Cancel</a></div>
 </form>
+</div>
 {% endblock %}

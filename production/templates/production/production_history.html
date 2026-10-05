@@ -1,10 +1,10 @@
 {% extends 'base.html' %}
 {% block title %}Production History{% endblock %}
+{% block page_heading %}Production{% endblock %}
 {% block content %}
-<h1>Production History</h1>
-<p><a href="{% url 'production:add' %}">Record production batch</a></p>
+<header class="page-heading"><div><span class="page-kicker">Manufacturing</span><h1>Production history</h1><p>Review completed batches and the quantities added to stock.</p></div><div class="page-actions"><a class="action-link primary" href="{% url 'production:add' %}">Record batch</a></div></header>
 {% if batches %}
-  <table>
+  <div class="table-panel"><div class="table-wrap"><table>
     <thead>
       <tr>
         <th>Batch number</th>
@@ -25,8 +25,8 @@
         </tr>
       {% endfor %}
     </tbody>
-  </table>
+  </table></div></div>
 {% else %}
-  <p>No production batches recorded yet.</p>
+  <p class="empty-state">No production batches have been recorded yet.</p>
 {% endif %}
 {% endblock %}

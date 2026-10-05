@@ -1,12 +1,12 @@
 {% extends 'base.html' %}
 {% block title %}{{ product.name }}{% endblock %}
+{% block page_heading %}Product record{% endblock %}
 {% block content %}
-<h2>{{ product.name }}</h2>
-<p><strong>Type:</strong> {{ product.get_product_type_display }}</p>
-<p><strong>Package Size:</strong> {{ product.package_size }}</p>
-<p><strong>Unit Price:</strong> GH₵{{ product.unit_price }}</p>
-<p><strong>Reorder Level:</strong> {{ product.reorder_level }}</p>
-<p><strong>Description:</strong> {{ product.description|default:"-" }}</p>
-<p><strong>Status:</strong> {{ product.get_status_display }}</p>
-<a href="{% url 'products:list' %}">Back to list</a>
+<header class="page-heading"><div><span class="page-kicker">Product catalogue</span><h1>{{ product.name }}</h1><p>{{ product.get_product_type_display }} · {{ product.package_size }}</p></div><span class="status-tag status-{{ product.status|slugify }}">{{ product.get_status_display }}</span></header>
+<div class="detail-grid">
+	<div class="detail-item"><span class="detail-label">Unit price</span><span class="detail-value">GH₵{{ product.unit_price|floatformat:2 }}</span></div>
+	<div class="detail-item"><span class="detail-label">Reorder level</span><span class="detail-value">{{ product.reorder_level }}</span></div>
+	<div class="detail-item"><span class="detail-label">Description</span><span class="detail-value">{{ product.description|default:"-" }}</span></div>
+</div>
+<div class="detail-actions"><a class="action-link" href="{% url 'products:list' %}">Back to products</a></div>
 {% endblock %}

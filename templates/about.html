@@ -1,51 +1,75 @@
 {% extends 'public_base.html' %}
+{% load static %}
 {% block title %}About | WMDMS{% endblock %}
 {% block styles %}
 <style>
-  .about { max-width: 1120px; margin: 0 auto; padding: 76px 34px 94px; }
-  .about-intro { max-width: 760px; padding-bottom: 38px; }
-  .eyebrow { color: var(--green); font-size: 12px; font-weight: 700; text-transform: uppercase; }
-  h1 { margin: 15px 0 16px; font: 800 48px/1.13 'Manrope', sans-serif; letter-spacing: 0; }
-  .about-intro p { max-width: 700px; margin: 0; color: var(--muted); font-size: 17px; line-height: 1.75; }
-  .about-grid { display: grid; grid-template-columns: repeat(3, 1fr); border-top: 1px solid var(--line); border-bottom: 1px solid var(--line); }
-  .about-item { padding: 27px 24px 30px; border-right: 1px solid var(--line); }
-  .about-item:first-child { padding-left: 0; }
-  .about-item:last-child { border: 0; }
-  .item-number { color: var(--coral); font: 700 13px 'Manrope', sans-serif; }
-  h2 { margin: 15px 0 8px; font-size: 18px; }
-  .about-item p { margin: 0; color: var(--muted); font-size: 14px; line-height: 1.7; }
-  .about-action { display: flex; align-items: center; justify-content: space-between; gap: 20px; margin-top: 34px; }
-  .about-action p { margin: 0; color: var(--muted); font-size: 14px; }
+  main { min-height: 0; }
+  .about-hero { position: relative; display: flex; min-height: 400px; align-items: center; overflow: hidden; isolation: isolate; background: var(--green-deep); color: white; }
+  .about-hero::before, .about-hero::after { position: absolute; z-index: -1; inset: 0; content: ''; }
+  .about-hero::before { background: url("{% static 'dashboard/water-source.jpg' %}") center 55% / cover no-repeat; }
+  .about-hero::after { background: rgb(10 37 31 / 72%); }
+  .about-hero-inner { width: min(100%, 1240px); margin: auto; padding: 70px 34px; }
+  .eyebrow { color: #e5c78c; font-size: 10px; font-weight: 800; text-transform: uppercase; }
+  h1 { max-width: 780px; margin: 15px 0 15px; color: white; font: 800 50px/1.1 'Manrope', sans-serif; letter-spacing: 0; }
+  .about-lede { max-width: 650px; margin: 0; color: #e2ebe5; font-size: 15px; line-height: 1.75; }
+  .about-flow { padding: 48px 34px 54px; background: #edf2ec; }
+  .about-flow-inner { max-width: 1172px; margin: auto; }
+  .flow-heading { display: flex; align-items: end; justify-content: space-between; gap: 22px; margin-bottom: 19px; }
+  .flow-kicker { display: block; margin-bottom: 7px; color: var(--green); font-size: 10px; font-weight: 800; text-transform: uppercase; }
+  .flow-heading h2 { margin: 0; color: var(--ink); font: 800 24px/1.25 'Manrope', sans-serif; }
+  .flow-heading p { max-width: 390px; margin: 0 0 2px; color: var(--muted); font-size: 12px; line-height: 1.65; }
+  .about-grid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 13px; }
+  .about-item { display: flex; min-height: 190px; flex-direction: column; padding: 20px; border: 1px solid #d6e0d6; border-top: 3px solid var(--green); border-radius: 4px; background: var(--white); }
+  .about-item:nth-child(2) { border-top-color: #bd795c; }
+  .about-item:nth-child(3) { border-top-color: #9b985f; }
+  .item-topline { display: flex; align-items: center; justify-content: space-between; gap: 12px; }
+  .item-number { color: #a8744f; font: 800 11px 'Manrope', sans-serif; }
+  .item-stage { color: var(--muted); font-size: 9px; font-weight: 800; text-transform: uppercase; }
+  .about-item h3 { margin: 22px 0 7px; color: var(--ink); font: 700 16px/1.35 'Manrope', sans-serif; }
+  .about-item p { margin: 0; color: var(--muted); font-size: 12px; line-height: 1.65; }
+  .about-action { display: flex; align-items: center; justify-content: space-between; gap: 22px; max-width: 1172px; margin: 0 auto; padding: 23px 34px; border-top: 1px solid var(--line); }
+  .about-action p { margin: 0; color: var(--muted); font-size: 13px; }
+  .about-action .button { gap: 15px; }
+  .about-action .button span { font-size: 17px; }
   @media (max-width: 650px) {
-    .about { padding: 48px 20px 64px; }
-    h1 { font-size: 38px; }
-    .about-intro p { font-size: 15px; }
-    .about-grid { grid-template-columns: 1fr; }
-    .about-item, .about-item:first-child { padding: 20px 0; border-right: 0; border-bottom: 1px solid var(--line); }
-    .about-item:last-child { border-bottom: 0; }
-    .about-action { align-items: flex-start; flex-direction: column; }
+    .about-hero { min-height: 365px; }
+    .about-hero-inner { padding: 55px 20px; }
+    h1 { font-size: 40px; }
+    .about-lede { font-size: 14px; }
+    .about-flow { padding: 32px 20px 38px; }
+    .flow-heading { align-items: flex-start; flex-direction: column; gap: 8px; }
+    .flow-heading h2 { font-size: 22px; }
+    .about-grid { grid-template-columns: 1fr; gap: 10px; }
+    .about-item { min-height: 160px; padding: 17px; }
+    .about-item h3 { margin-top: 16px; }
+    .about-action { align-items: flex-start; flex-direction: column; padding: 20px; }
   }
 </style>
 {% endblock %}
 {% block content %}
-<article class="about">
-  <div class="about-intro">
+<section class="about-hero">
+  <div class="about-hero-inner">
     <span class="eyebrow">About the system</span>
-    <h1>Better visibility across the water business.</h1>
-    <p>The Water Manufacturing &amp; Distribution Management System brings day-to-day operations into one workspace, helping teams keep track of what is produced, what is available and what has been delivered.</p>
+    <h1>One clear view of water operations.</h1>
+    <p class="about-lede">The Water Manufacturing &amp; Distribution Management System brings day-to-day work into one place, from what is produced and available to what reaches the customer.</p>
   </div>
-  <section class="about-grid" aria-label="What the system brings together">
-    <div class="about-item"><span class="item-number">01</span><h2>Manage supply</h2><p>Record production batches, monitor inventory and review stock movements.</p></div>
-    <div class="about-item"><span class="item-number">02</span><h2>Serve customers</h2><p>Organize customer orders, payments and the work needed to fulfill them.</p></div>
-    <div class="about-item"><span class="item-number">03</span><h2>Follow delivery</h2><p>Coordinate distribution and use reports to understand operational activity.</p></div>
-  </section>
-  <div class="about-action">
-    <p>Access to operational tools is available to authorized users.</p>
+</section>
+<section class="about-flow" aria-label="How the system supports operations">
+  <div class="about-flow-inner">
+    <header class="flow-heading"><div><span class="flow-kicker">The operational flow</span><h2>From supply to service.</h2></div><p>Keep the connected stages of the business visible to the people responsible for them.</p></header>
+    <div class="about-grid">
+      <article class="about-item"><div class="item-topline"><span class="item-number">01</span><span class="item-stage">Supply</span></div><h3>Manage production and stock</h3><p>Record production batches, monitor inventory, and review stock movements.</p></article>
+      <article class="about-item"><div class="item-topline"><span class="item-number">02</span><span class="item-stage">Customer</span></div><h3>Coordinate orders and payments</h3><p>Organize customer orders, payment activity, and the work needed to fulfill each order.</p></article>
+      <article class="about-item"><div class="item-topline"><span class="item-number">03</span><span class="item-stage">Delivery</span></div><h3>Follow distribution</h3><p>Coordinate deliveries and review reports to understand operational activity.</p></article>
+    </div>
+  </div>
+</section>
+<div class="about-action">
+    <p>Operational tools are available to authorized users.</p>
     {% if user.is_authenticated %}
-      <a class="button" href="{% url 'dashboard:home' %}">Open workspace</a>
+      <a class="button" href="{% url 'dashboard:home' %}"><span>Open workspace</span><span aria-hidden="true">&rarr;</span></a>
     {% else %}
-      <a class="button" href="{% url 'accounts:login' %}">Log in to your system</a>
+      <a class="button" href="{% url 'accounts:login' %}"><span>Staff sign in</span><span aria-hidden="true">&rarr;</span></a>
     {% endif %}
-  </div>
-</article>
+</div>
 {% endblock %}

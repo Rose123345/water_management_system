@@ -1,6 +1,6 @@
 from django.contrib import messages
-from django.contrib.auth.decorators import login_required
 from django.shortcuts import get_object_or_404, redirect, render
+from accounts.permissions import ROLE_ACCESS, role_required
 
 from sales.models import Order
 
@@ -8,14 +8,14 @@ from .forms import PaymentForm
 from .models import Payment
 
 
-@login_required
+@role_required(*ROLE_ACCESS['payments'])
 def payment_list(request, order_pk):
 	order = get_object_or_404(Order, pk=order_pk)
 	payments = order.payments.all()
 	return render(request, 'payment/payment_list.html', {'order': order, 'payments': payments})
 
 
-@login_required
+@role_required(*ROLE_ACCESS['payments'])
 def payment_create(request, order_pk):
 	order = get_object_or_404(Order, pk=order_pk)
 	if request.method == 'POST':

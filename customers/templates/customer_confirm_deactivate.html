@@ -1,11 +1,12 @@
 {% extends 'base.html' %}
 {% block title %}Deactivate Customer{% endblock %}
+{% block page_heading %}Customer status{% endblock %}
 {% block content %}
-<h2>Deactivate {{ customer.name }}?</h2>
-<p>This marks the customer as inactive. Their history is kept, not deleted.</p>
+<header class="page-heading"><div><span class="page-kicker">Confirm change</span><h1>Deactivate {{ customer.name }}?</h1><p>This marks the customer as inactive. Their history is retained.</p></div></header>
+<div class="form-shell">
 <form method="post">
   {% csrf_token %}
-  <button type="submit">Yes, deactivate</button>
-  <a href="{% url 'customers:list' %}">Cancel</a>
+  <div class="form-actions"><button type="submit">Deactivate customer</button><a href="{% url 'customers:list' %}">Cancel</a></div>
 </form>
+</div>
 {% endblock %}

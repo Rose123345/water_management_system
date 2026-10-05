@@ -1,7 +1,8 @@
 {% extends 'base.html' %}
 {% block title %}Record Payment{% endblock %}
+{% block page_heading %}Payments{% endblock %}
 {% block content %}
-<h1>Record payment for {{ order.order_number }}</h1>
-<p>Outstanding balance: {{ order.balance }}</p>
-<form method="post">{% csrf_token %}{{ form.as_p }}<button type="submit">Record payment</button></form>
+<header class="page-heading"><div><span class="page-kicker">Order {{ order.order_number }}</span><h1>Record payment</h1><p>Post a payment against this order.</p></div></header>
+<section class="metric-grid" aria-label="Order balance"><article class="metric"><span class="metric-label">Outstanding balance</span><strong class="metric-value">GH₵{{ order.balance|floatformat:2 }}</strong><span class="metric-foot">Maximum remaining amount</span></article></section>
+<div class="form-shell"><form method="post">{% csrf_token %}{{ form.as_p }}<div class="form-actions"><button type="submit">Record payment</button><a href="{% url 'payments:list' order.pk %}">Cancel</a></div></form></div>
 {% endblock %}

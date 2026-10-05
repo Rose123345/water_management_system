@@ -1,45 +1,54 @@
 {% extends 'base.html' %}
 {% block title %}Inventory{% endblock %}
+{% block page_heading %}Inventory{% endblock %}
 {% block content %}
-<h1>Inventory</h1>
-<p><a href="{% url 'inventory:movement_add' %}">Record stock movement</a></p>
+<header class="page-heading"><div><span class="page-kicker">Stock control</span><h1>Inventory overview</h1><p>Check availability, spot reorder risks, and review stock activity.</p></div><div class="page-actions"><a class="action-link primary" href="{% url 'inventory:movement_add' %}">Record stock movement</a></div></header>
 
-<h2>Low Stock</h2>
+<section class="metric-grid" aria-label="Inventory summary">
+  <article class="metric"><span class="metric-label">Products tracked</span><strong class="metric-value">{{ product_count }}</strong><span class="metric-foot">Across the catalogue</span></article>
+  <article class="metric"><span class="metric-label">Units on hand</span><strong class="metric-value">{{ units_on_hand }}</strong><span class="metric-foot">Current available stock</span></article>
+  <article class="metric"><span class="metric-label">Below reorder point</span><strong class="metric-value">{{ low_stock_count }}</strong><span class="metric-foot">Products needing attention</span></article>
+  <article class="metric"><span class="metric-label">Recent activity</span><strong class="metric-value">{{ movements|length }}</strong><span class="metric-foot">Latest movements shown below</span></article>
+</section>
+
+<section class="section-block"><h2 class="section-title">Low Stock <small>Products at or below their reorder point</small></h2>
 {% if low_stock_products %}
-  <table>
+  <div class="table-panel"><div class="table-wrap"><table>
     <thead><tr><th>Product</th><th>Available</th><th>Reorder level</th></tr></thead>
     <tbody>
       {% for product in low_stock_products %}
         <tr>
           <td>{{ product.name }}</td>
-          <td>{{ product.stock_quantity }}</td>
+          <td><span class="status-tag status-pending">{{ product.stock_quantity }} available</span></td>
           <td>{{ product.reorder_level }}</td>
         </tr>
       {% endfor %}
     </tbody>
-  </table>
+  </table></div></div>
 {% else %}
-  <p>No products are currently at or below their reorder level.</p>
+  <p class="empty-state">No products are currently at or below their reorder level.</p>
 {% endif %}
+</section>
 
-<h2>Stock On Hand</h2>
-<table>
+<section class="section-block"><h2 class="section-title">Stock on hand <small>Current available quantity by product</small></h2>
+<div class="table-panel"><div class="table-wrap"><table>
   <thead><tr><th>Product</th><th>Available quantity</th><th>Reorder level</th></tr></thead>
   <tbody>
     {% for product in products %}
       <tr>
         <td>{{ product.name }}</td>
-        <td>{{ product.stock_quantity }}</td>
+        <td><span class="status-tag{% if product.stock_quantity <= product.reorder_level %} status-pending{% else %} status-active{% endif %}">{{ product.stock_quantity }}</span></td>
         <td>{{ product.reorder_level }}</td>
       </tr>
     {% empty %}
       <tr><td colspan="3">No products found.</td></tr>
     {% endfor %}
   </tbody>
-</table>
+</table></div></div>
+</section>
 
-<h2>Recent Stock Movements</h2>
-<table>
+<section class="section-block"><h2 class="section-title">Recent movements <small>Latest recorded adjustments</small></h2>
+<div class="table-panel"><div class="table-wrap"><table>
   <thead><tr><th>Recorded</th><th>Product</th><th>Movement</th><th>Quantity</th><th>Reference</th><th>Recorded by</th></tr></thead>
   <tbody>
     {% for movement in movements %}
@@ -55,5 +64,6 @@
       <tr><td colspan="6">No stock movements recorded.</td></tr>
     {% endfor %}
   </tbody>
-</table>
+</table></div></div>
+</section>
 {% endblock %}
