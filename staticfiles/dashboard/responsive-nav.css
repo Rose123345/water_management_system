@@ -1,0 +1,24 @@
+.nav-toggle { display: none; width: 44px; height: 44px; flex: none; place-items: center; border: 1px solid rgb(255 255 255 / 22%); border-radius: 5px; background: transparent; color: currentColor; cursor: pointer; }
+.nav-toggle:hover { background: rgb(255 255 255 / 8%); }
+.nav-toggle:focus-visible { outline: 3px solid #c99a58; outline-offset: 3px; }
+.menu-icon { display: grid; width: 20px; gap: 5px; }
+.menu-icon span { display: block; width: 20px; height: 2px; border-radius: 2px; background: currentColor; transition: transform .16s ease, opacity .16s ease; }
+.nav-toggle[aria-expanded="true"] .menu-icon span:first-child { transform: translateY(7px) rotate(45deg); }
+.nav-toggle[aria-expanded="true"] .menu-icon span:nth-child(2) { opacity: 0; }
+.nav-toggle[aria-expanded="true"] .menu-icon span:last-child { transform: translateY(-7px) rotate(-45deg); }
+@media (max-width: 900px) {
+  .rail-top { display: flex; align-items: center; justify-content: space-between; gap: 12px; }
+  .rail-top .nav-toggle { display: grid; }
+  .rail .nav-list { display: none; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 5px; margin: 0; overflow: visible; padding: 12px 0 2px; }
+  .rail .nav-list.is-open { display: grid; }
+  .rail .nav-list a { min-width: 0; min-height: 42px; gap: 8px; padding: 0 9px; font-size: 11px; }
+}
+@media (max-width: 600px) {
+  .site-header-inner { display: grid; grid-template-columns: minmax(0, 1fr) auto; height: auto; min-height: 70px; align-items: center; gap: 0 12px; padding: 12px 20px; }
+  .site-header .nav-toggle { display: grid; grid-column: 2; grid-row: 1; }
+  .site-header .nav-links { display: none; grid-column: 1 / -1; grid-row: 2; width: 100%; align-items: stretch; flex-direction: column; gap: 0; padding: 10px 0 2px; font-size: 13px; }
+  .site-header .nav-links.is-open { display: flex; }
+  .site-header .nav-links > a:not(.nav-cta) { display: flex; min-height: 44px; align-items: center; padding: 0 8px; border-top: 1px solid rgb(255 255 255 / 12%); }
+  .site-header .nav-links .nav-cta { width: 100%; min-height: 42px; margin-top: 8px; }
+}
+@media (prefers-reduced-motion: reduce) { .menu-icon span { transition: none; } }
