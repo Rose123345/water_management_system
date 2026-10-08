@@ -28,6 +28,7 @@ urlpatterns = [
     path('customers/products/', lambda request: redirect('products:list')),
     path('customers/', include('customers.urls')),  # Include the URLs from the customers app
     path('accounts/', include('accounts.urls')),  # Include the URLs from the accounts app
+    path('my-account/', include('customers.portal_urls')),  # Customer portal
     path('products/', include('products.urls')),  # Include the URLs from the products app
     path('production/', include('production.urls')),  # Include the URLs from the production app
     path('Inventory/', include('Inventory.urls')),  # Include the URLs from the Inventory app

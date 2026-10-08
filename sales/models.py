@@ -1,8 +1,9 @@
+import uuid
 from decimal import Decimal
 
 from django.conf import settings
 from django.core.exceptions import ValidationError
-from django.db import models
+from django.db import models, transaction
 
 
 class Order(models.Model):
@@ -28,9 +29,16 @@ class Order(models.Model):
 		ordering = ['-created_at', '-pk']
 
 	def save(self, *args, **kwargs):
-		if not self.order_number:
-			self.order_number = f'ORD-{self.__class__.objects.count() + 1:06d}'
-		super().save(*args, **kwargs)
+		if self.order_number:
+			super().save(*args, **kwargs)
+			return
+		# Number from the primary key so concurrent saves or deleted orders
+		# can never produce a duplicate order number.
+		with transaction.atomic():
+			self.order_number = f'TMP-{uuid.uuid4().hex[:16]}'
+			super().save(*args, **kwargs)
+			self.order_number = f'ORD-{self.pk:06d}'
+			super().save(update_fields=['order_number'])
 
 	def __str__(self):
 		return self.order_number
@@ -72,9 +80,12 @@ class OrderItem(models.Model):
 		return self.unit_price * self.quantity
 
 	def clean(self):
-		if self.quantity <= 0:
+		# Order forms only ask for product and quantity; price comes from the product.
+		if self.unit_price is None and self.product_id:
+			self.unit_price = self.product.unit_price
+		if self.quantity is not None and self.quantity <= 0:
 			raise ValidationError({'quantity': 'Quantity must be greater than zero.'})
-		if self.unit_price <= 0:
+		if self.unit_price is not None and self.unit_price <= 0:
 			raise ValidationError({'unit_price': 'Unit price must be greater than zero.'})
 
 	def save(self, *args, **kwargs):
@@ -82,6 +93,3 @@ class OrderItem(models.Model):
 			self.unit_price = self.product.unit_price
 		self.full_clean()
 		super().save(*args, **kwargs)
-from django.db import models
-
-# Create your models here.

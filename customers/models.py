@@ -26,6 +26,11 @@ class Customer(models.Model):
     email = models.EmailField(blank=True)
     address = models.TextField(blank=True)
     status = models.CharField(max_length=10, choices=Status.choices, default=Status.ACTIVE)
+    user = models.OneToOneField(
+        settings.AUTH_USER_MODEL, on_delete=models.SET_NULL,
+        null=True, blank=True, related_name='customer_profile',
+        help_text='Login account this customer uses for the customer portal.'
+    )
     created_by = models.ForeignKey(
         settings.AUTH_USER_MODEL, on_delete=models.SET_NULL,
         null=True, blank=True, related_name='customers_created'

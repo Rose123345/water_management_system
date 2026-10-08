@@ -8,8 +8,3 @@ urlpatterns = [
 	path('order/<int:order_pk>/', views.payment_list, name='list'),
 	path('order/<int:order_pk>/add/', views.payment_create, name='add'),
 ]
-from django.urls import path
-from payment import views
-
-
-urlpatterns = []

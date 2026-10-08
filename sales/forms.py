@@ -33,3 +33,8 @@ class OrderItemForm(forms.ModelForm):
 OrderItemFormSet = inlineformset_factory(
     Order, OrderItem, form=OrderItemForm, extra=1, can_delete=True
 )
+
+# Customers place orders from the portal; they need at least one item and a few blank rows.
+CustomerOrderItemFormSet = inlineformset_factory(
+    Order, OrderItem, form=OrderItemForm, extra=2, min_num=1, validate_min=True, can_delete=False
+)

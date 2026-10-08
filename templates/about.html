@@ -67,7 +67,7 @@
 <div class="about-action">
     <p>Operational tools are available to authorized users.</p>
     {% if user.is_authenticated %}
-      <a class="button" href="{% url 'dashboard:home' %}"><span>Open workspace</span><span aria-hidden="true">&rarr;</span></a>
+      <a class="button" href="{{ workspace_home }}"><span>{% if is_customer_account %}My account{% else %}Open workspace{% endif %}</span><span aria-hidden="true">&rarr;</span></a>
     {% else %}
       <a class="button" href="{% url 'accounts:login' %}"><span>Staff sign in</span><span aria-hidden="true">&rarr;</span></a>
     {% endif %}

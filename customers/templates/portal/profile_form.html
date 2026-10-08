@@ -1,0 +1,7 @@
+{% extends 'base.html' %}
+{% block title %}My details | WMDMS{% endblock %}
+{% block page_heading %}My details{% endblock %}
+{% block content %}
+<header class="page-heading"><div><span class="page-kicker">Customer account</span><h1>{% if creating %}Complete your details{% else %}My details{% endif %}</h1><p>{% if creating %}Tell us who you are and where to deliver before placing your first order.{% else %}Keep your contact and delivery details up to date.{% endif %}</p></div></header>
+<div class="form-shell entry-form"><form method="post">{% csrf_token %}{{ form.as_p }}<div class="form-actions"><button type="submit">Save details</button>{% if not creating %}<a href="{% url 'portal:home' %}">Cancel</a>{% endif %}</div></form></div>
+{% endblock %}

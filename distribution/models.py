@@ -29,6 +29,3 @@ class Delivery(models.Model):
 
 	def __str__(self):
 		return f'{self.order.order_number} - {self.get_status_display()}'
-from django.db import models
-
-# Create your models here.

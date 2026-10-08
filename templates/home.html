@@ -84,7 +84,7 @@
     <p>See the complete operation in one place, from production and stock to customer orders, payments, and delivery.</p>
     <div class="hero-actions">
       {% if user.is_authenticated %}
-        <a class="button hero-primary" href="{% url 'dashboard:home' %}"><span>Open workspace</span><span aria-hidden="true">&rarr;</span></a>
+        <a class="button hero-primary" href="{{ workspace_home }}"><span>{% if is_customer_account %}My account{% else %}Open workspace{% endif %}</span><span aria-hidden="true">&rarr;</span></a>
       {% else %}
         <a class="button hero-primary" href="{% url 'accounts:login' %}"><span>Enter the workspace</span><span aria-hidden="true">&rarr;</span></a>
       {% endif %}

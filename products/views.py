@@ -1,5 +1,6 @@
 from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib import messages
+from django.views.decorators.http import require_POST
 from accounts.permissions import ROLE_ACCESS, in_groups, role_required
 from .models import Product
 from .forms import ProductForm
@@ -37,10 +38,6 @@ def product_list(request):
 
 @role_required('Administrator')
 def product_add(request):
-    if not in_groups(request.user, ['Administrator']):
-        messages.error(request, "You don't have permission to add products.")
-        return redirect('products:list')
-
     if request.method == 'POST':
         form = ProductForm(request.POST)
         if form.is_valid():
@@ -56,10 +53,6 @@ def product_add(request):
 
 @role_required('Administrator')
 def product_edit(request, pk):
-    if not in_groups(request.user, ['Administrator']):
-        messages.error(request, "You don't have permission to edit products.")
-        return redirect('products:list')
-
     product = get_object_or_404(Product, pk=pk)
     if request.method == 'POST':
         form = ProductForm(request.POST, instance=product)
@@ -80,10 +73,6 @@ def product_detail(request, pk):
 
 @role_required('Administrator')
 def product_deactivate(request, pk):
-    if not in_groups(request.user, ['Administrator']):
-        messages.error(request, "You don't have permission to deactivate products.")
-        return redirect('products:list')
-
     product = get_object_or_404(Product, pk=pk)
     if request.method == 'POST':
         product.status = Product.Status.INACTIVE
@@ -94,11 +83,8 @@ def product_deactivate(request, pk):
 
 
 @role_required('Administrator')
+@require_POST
 def product_activate(request, pk):
-    if not in_groups(request.user, ['Administrator']):
-        messages.error(request, "You don't have permission to activate products.")
-        return redirect('products:list')
-
     product = get_object_or_404(Product, pk=pk)
     product.status = Product.Status.ACTIVE
     product.save()

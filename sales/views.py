@@ -11,6 +11,12 @@ from .services import advance_order_status, cancel_order, OrderStatusError
 MANAGE_ROLES = ['Administrator', 'Sales Officer']
 
 
+def _error_text(error):
+    if isinstance(error, ValidationError):
+        return ' '.join(error.messages)
+    return str(error)
+
+
 @role_required(*ROLE_ACCESS['sales'])
 def order_list(request):
     orders = Order.objects.select_related('customer')
@@ -42,7 +48,7 @@ def order_add(request):
                 order.save()
                 formset.instance = order
                 formset.save()
-            messages.success(request, f"Order #{order.pk} created.")
+            messages.success(request, f"Order {order.order_number} created.")
             return redirect('sales:detail', pk=order.pk)
     else:
         form = OrderForm()
@@ -58,6 +64,11 @@ def order_detail(request, pk):
         'order': order,
         'items': order.items.select_related('product'),
         'can_manage': in_groups(request.user, MANAGE_ROLES),
+        'can_record_payment': (
+            order.status != Order.Status.CANCELLED
+            and order.balance > 0
+            and in_groups(request.user, ROLE_ACCESS['payments'])
+        ),
     })
 
 
@@ -72,9 +83,9 @@ def order_advance(request, pk):
     try:
         updated = advance_order_status(order, request.user)
     except (OrderStatusError, ValidationError) as error:
-        messages.error(request, str(error))
+        messages.error(request, _error_text(error))
     else:
-        messages.success(request, f"Order #{updated.pk} is now {updated.get_status_display()}.")
+        messages.success(request, f"Order {updated.order_number} is now {updated.get_status_display()}.")
     return redirect('sales:detail', pk=pk)
 
 
@@ -88,8 +99,8 @@ def order_cancel(request, pk):
     order = get_object_or_404(Order, pk=pk)
     try:
         cancel_order(order, request.user)
-    except OrderStatusError as error:
-        messages.error(request, str(error))
+    except (OrderStatusError, ValidationError) as error:
+        messages.error(request, _error_text(error))
     else:
-        messages.success(request, f"Order #{order.pk} was cancelled.")
+        messages.success(request, f"Order {order.order_number} was cancelled.")
     return redirect('sales:detail', pk=pk)

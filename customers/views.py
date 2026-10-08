@@ -1,6 +1,7 @@
 
 from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib import messages
+from django.views.decorators.http import require_POST
 from accounts.permissions import ROLE_ACCESS, role_required
 from .models import Customer
 from .forms import CustomerForm
@@ -64,6 +65,7 @@ def customer_deactivate(request, pk):
 
 
 @role_required(*ROLE_ACCESS['customers'])
+@require_POST
 def customer_activate(request, pk):
     customer = get_object_or_404(Customer, pk=pk)
     customer.status = Customer.Status.ACTIVE

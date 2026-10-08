@@ -26,7 +26,7 @@
       {% if product.status == 'active' %}
         | <a href="{% url 'products:deactivate' product.pk %}">Deactivate</a>
       {% else %}
-        | <a href="{% url 'products:activate' product.pk %}">Activate</a>
+        | <form class="inline-form" method="post" action="{% url 'products:activate' product.pk %}">{% csrf_token %}<button type="submit" class="link-button">Activate</button></form>
       {% endif %}
       </div>
     </td>

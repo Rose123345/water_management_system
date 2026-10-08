@@ -6,13 +6,11 @@ from .models import Payment
 class PaymentForm(forms.ModelForm):
     class Meta:
         model = Payment
-        fields = ['amount', 'method', 'reference', 'status']
-        widgets = {'status': forms.HiddenInput()}
+        fields = ['amount', 'method', 'reference']
 
     def __init__(self, *args, order=None, **kwargs):
         super().__init__(*args, **kwargs)
         self.order = order
-        self.initial.setdefault('status', Payment.Status.COMPLETED)
 
     def clean_amount(self):
         amount = self.cleaned_data['amount']

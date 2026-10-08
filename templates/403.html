@@ -2,6 +2,12 @@
 {% block title %}Access restricted | WMDMS{% endblock %}
 {% block page_heading %}Access restricted{% endblock %}
 {% block content %}
+{% if is_customer_account %}
+<h1>This area is for staff</h1>
+<p>Your customer account can place and track orders from your customer portal.</p>
+<p><a class="action-link primary" href="{{ workspace_home }}">Go to my orders</a></p>
+{% else %}
 <h1>This workspace area is restricted</h1>
 <p>Your account does not have a role that can open this page. Ask a system administrator to assign the appropriate WMDMS role.</p>
+{% endif %}
 {% endblock %}

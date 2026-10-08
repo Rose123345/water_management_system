@@ -1,0 +1,30 @@
+{% extends 'base.html' %}
+{% block title %}My orders | WMDMS{% endblock %}
+{% block page_heading %}My orders{% endblock %}
+{% block content %}
+<header class="page-heading">
+  <div><span class="page-kicker">Welcome back</span><h1>{{ customer.name }}</h1><p>Place new orders and follow the ones you have already made.</p></div>
+  <div class="page-actions"><a class="action-link" href="{% url 'portal:products' %}">View products</a><a class="action-link primary" href="{% url 'portal:order_add' %}">Place an order</a></div>
+</header>
+<div class="detail-grid">
+  <div class="detail-item"><span class="detail-label">Phone</span><span class="detail-value">{{ customer.phone|default:"-" }}</span></div>
+  <div class="detail-item"><span class="detail-label">Email</span><span class="detail-value">{{ customer.email|default:"-" }}</span></div>
+  <div class="detail-item"><span class="detail-label">Delivery address</span><span class="detail-value">{{ customer.address|default:"Not set" }}</span></div>
+</div>
+<section class="section-block">
+  <h2 class="section-title">Orders <small>{{ orders|length }} total</small></h2>
+  <div class="table-panel"><div class="table-wrap"><table>
+    <thead><tr><th>Order</th><th>Placed</th><th>Status</th><th>Total</th><th>Balance</th><th>Delivery</th></tr></thead>
+    <tbody>{% for order in orders %}
+    <tr>
+      <td><a href="{% url 'portal:order_detail' order.pk %}">{{ order.order_number }}</a></td>
+      <td>{{ order.created_at|date:"M j, Y" }}</td>
+      <td><span class="status-tag status-{{ order.status|slugify }}">{{ order.get_status_display }}</span></td>
+      <td>GH₵{{ order.total|floatformat:2 }}</td>
+      <td>GH₵{{ order.balance|floatformat:2 }}</td>
+      <td>{% if order.delivery %}{{ order.delivery.get_status_display }}{% else %}-{% endif %}</td>
+    </tr>
+    {% empty %}<tr><td colspan="6" class="empty-state">You have not placed any orders yet. <a href="{% url 'portal:order_add' %}">Place your first order</a>.</td></tr>{% endfor %}</tbody>
+  </table></div></div>
+</section>
+{% endblock %}

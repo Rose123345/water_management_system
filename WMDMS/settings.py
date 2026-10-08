@@ -32,9 +32,26 @@ SECRET_KEY = os.environ.get('SECRET_KEY')
 DEBUG = os.environ.get('DEBUG', 'False') == 'True'
 
 ALLOWED_HOSTS = os.environ.get('ALLOWED_HOSTS', '127.0.0.1,localhost,testserver').split(',')
+CSRF_TRUSTED_ORIGINS = [
+    origin.strip() for origin in os.environ.get('CSRF_TRUSTED_ORIGINS', '').split(',') if origin.strip()
+]
+
+
+def env_flag(name, default):
+    return os.environ.get(name, str(default)) == 'True'
+
+
+# HTTPS hardening for deployments. Hosting platforms terminate TLS at a proxy.
+if not DEBUG:
+    SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
+    SESSION_COOKIE_SECURE = env_flag('SESSION_COOKIE_SECURE', True)
+    CSRF_COOKIE_SECURE = env_flag('CSRF_COOKIE_SECURE', True)
+    SECURE_SSL_REDIRECT = env_flag('SECURE_SSL_REDIRECT', False)
+    SECURE_HSTS_SECONDS = int(os.environ.get('SECURE_HSTS_SECONDS', '0'))
+    SECURE_CONTENT_TYPE_NOSNIFF = True
 
 LOGIN_URL = 'accounts:login'
-LOGIN_REDIRECT_URL = 'products:list'
+LOGIN_REDIRECT_URL = 'dashboard:home'
 
 # Application definition
 
@@ -157,7 +174,7 @@ USE_TZ = True
 # https://docs.djangoproject.com/en/6.1/howto/static-files/
 
 STATIC_URL = 'static/'
-STATICFILES_DIRS = [BASE_DIR / 'static']
+STATICFILES_DIRS = [path for path in [BASE_DIR / 'static'] if path.exists()]
 STATIC_ROOT = BASE_DIR / 'staticfiles'
 STORAGES = {
     "default": {

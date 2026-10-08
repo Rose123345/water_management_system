@@ -32,7 +32,7 @@
 	<aside class="content-panel dashboard-side" aria-label="Items needing attention">
 		<section class="panel-content watch-group">
 			<h2 class="watch-title">Low stock <span class="watch-count">{{ low_stock_count }} items</span></h2>
-			{% if low_stock %}<ul class="watch-list">{% for stock in low_stock|slice:":5" %}<li><a href="{% url 'inventory:list' %}">{{ stock.product }}</a><span class="watch-meta">{{ stock.quantity_on_hand }} left</span></li>{% endfor %}</ul>{% else %}<p class="empty-state">All products are above their reorder levels.</p>{% endif %}
+			{% if low_stock %}<ul class="watch-list">{% for product in low_stock %}<li><a href="{% url 'inventory:list' %}">{{ product }}</a><span class="watch-meta">{{ product.stock_quantity }} left</span></li>{% endfor %}</ul>{% else %}<p class="empty-state">All products are above their reorder levels.</p>{% endif %}
 		</section>
 		<section class="panel-content watch-group">
 			<h2 class="watch-title">Pending deliveries <span class="watch-count">{{ pending_delivery_count }} open</span></h2>

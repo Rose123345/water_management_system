@@ -1,0 +1,16 @@
+{% extends 'base.html' %}
+{% block title %}Place an order | WMDMS{% endblock %}
+{% block page_heading %}Place an order{% endblock %}
+{% block content %}
+<header class="page-heading"><div><span class="page-kicker">New order</span><h1>Place an order</h1><p>Choose the products and quantities you need. Our sales team will confirm your order and arrange delivery.</p></div></header>
+<div class="form-shell entry-form">
+<form method="post">
+  {% csrf_token %}
+  {{ formset.management_form }}
+  {% if formset.non_form_errors %}<div class="flash error" role="alert">{{ formset.non_form_errors }}</div>{% endif %}
+  {% for item_form in formset %}<fieldset><legend>Item {{ forloop.counter }}</legend>{{ item_form.as_p }}</fieldset>{% endfor %}
+  <p>Leave a row empty if you don&rsquo;t need it.</p>
+  <div class="form-actions"><button type="submit">Place order</button><a href="{% url 'portal:home' %}">Cancel</a></div>
+</form>
+</div>
+{% endblock %}

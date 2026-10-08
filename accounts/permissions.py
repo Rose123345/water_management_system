@@ -2,6 +2,8 @@ from functools import wraps
 
 from django.contrib.auth.decorators import login_required
 from django.core.exceptions import PermissionDenied
+from django.shortcuts import redirect
+from django.urls import reverse
 
 
 ROLE_ACCESS = {
@@ -25,7 +27,12 @@ ROLE_ACCESS = {
     'reports': ('Administrator', 'Operations Manager', 'Accountant'),
 }
 
-ROLE_NAMES = tuple(dict.fromkeys(role for roles in ROLE_ACCESS.values() for role in roles))
+STAFF_ROLE_NAMES = tuple(dict.fromkeys(role for roles in ROLE_ACCESS.values() for role in roles))
+
+# Customers sign up from the public register page and only use the customer portal.
+CUSTOMER_ROLE = 'Customer'
+
+ROLE_NAMES = STAFF_ROLE_NAMES + (CUSTOMER_ROLE,)
 
 
 def in_groups(user, group_names):
@@ -43,4 +50,42 @@ def role_required(*group_names):
 
         return wrapped_view
 
+    return decorator
+
+
+def is_staff_member(user):
+    return user.is_authenticated and in_groups(user, STAFF_ROLE_NAMES)
+
+
+def is_customer(user):
+    return (
+        user.is_authenticated
+        and not is_staff_member(user)
+        and user.groups.filter(name=CUSTOMER_ROLE).exists()
+    )
+
+
+def home_url_for(user):
+    """Where a signed-in user should land: the staff dashboard or the customer portal."""
+    if is_customer(user):
+        return reverse('portal:home')
+    return reverse('dashboard:home')
+
+
+def customer_required(view_func=None, *, require_profile=True):
+    """Allow only customer accounts; send customers without a profile to complete it."""
+    def decorator(view_func):
+        @login_required
+        @wraps(view_func)
+        def wrapped_view(request, *args, **kwargs):
+            if not is_customer(request.user):
+                raise PermissionDenied
+            if require_profile and not hasattr(request.user, 'customer_profile'):
+                return redirect('portal:profile')
+            return view_func(request, *args, **kwargs)
+
+        return wrapped_view
+
+    if view_func is not None:
+        return decorator(view_func)
     return decorator

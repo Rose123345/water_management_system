@@ -1,5 +1,9 @@
 from django.core.exceptions import ValidationError
 from django.db import transaction
+from django.db.models import F, Q, Value
+from django.db.models.functions import Coalesce
+
+from products.models import Product
 from .models import Stock, StockMovement
 
 
@@ -29,3 +33,16 @@ def record_stock_movement(product, movement_type, quantity, recorded_by=None, no
         production_batch=production_batch,
         recorded_by=recorded_by,
     )
+
+
+def products_with_stock():
+    return Product.objects.annotate(
+        stock_quantity=Coalesce('stock__quantity_on_hand', Value(0)),
+    )
+
+
+def low_stock_products():
+    """Active products at or below their reorder level, including ones never stocked."""
+    return products_with_stock().filter(status=Product.Status.ACTIVE).filter(
+        Q(stock__isnull=True) | Q(stock__quantity_on_hand__lte=F('reorder_level'))
+    ).order_by('stock_quantity', 'name')

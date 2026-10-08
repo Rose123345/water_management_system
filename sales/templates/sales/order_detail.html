@@ -2,12 +2,17 @@
 {% block title %}{{ order.order_number }}{% endblock %}
 {% block page_heading %}Sales orders{% endblock %}
 {% block content %}
-<header class="page-heading"><div><span class="page-kicker">Order details</span><h1>{{ order.order_number }}</h1><p>{{ order.customer }}</p></div><div class="page-actions"><span class="status-tag status-{{ order.status|slugify }}">{{ order.get_status_display }}</span>{% if order.balance > 0 %}<a class="action-link primary" href="{% url 'payments:add' order.pk %}">Record payment</a>{% endif %}</div></header>
+<header class="page-heading"><div><span class="page-kicker">Order details</span><h1>{{ order.order_number }}</h1><p>{{ order.customer }}</p></div><div class="page-actions"><span class="status-tag status-{{ order.status|slugify }}">{{ order.get_status_display }}</span>{% if can_record_payment %}<a class="action-link primary" href="{% url 'payments:add' order.pk %}">Record payment</a>{% endif %}<a class="action-link" href="{% url 'payments:list' order.pk %}">Payments</a></div></header>
 <div class="detail-grid">
   <div class="detail-item"><span class="detail-label">Subtotal</span><span class="detail-value">GH₵{{ order.subtotal|floatformat:2 }}</span></div>
   <div class="detail-item"><span class="detail-label">Total paid</span><span class="detail-value">GH₵{{ order.amount_paid|floatformat:2 }}</span></div>
   <div class="detail-item"><span class="detail-label">Balance due</span><span class="detail-value">GH₵{{ order.balance|floatformat:2 }}</span></div>
 </div>
 <section class="section-block"><h2 class="section-title">Items <small>{{ items|length }} lines</small></h2><div class="table-panel"><div class="table-wrap"><table><thead><tr><th>Product</th><th>Quantity</th><th>Unit price</th><th>Line total</th></tr></thead><tbody>{% for item in items %}<tr><td>{{ item.product }}</td><td>{{ item.quantity }}</td><td>GH₵{{ item.unit_price|floatformat:2 }}</td><td>GH₵{{ item.line_total|floatformat:2 }}</td></tr>{% empty %}<tr><td colspan="4" class="empty-state">No items on this order.</td></tr>{% endfor %}</tbody></table></div></div></section>
-{% if order.status == 'draft' and can_manage %}<form class="detail-actions" method="post" action="{% url 'sales:advance' order.pk %}">{% csrf_token %}<button type="submit">Confirm order</button></form>{% endif %}
+{% if can_manage and order.status == 'draft' or can_manage and order.status == 'confirmed' %}
+<div class="detail-actions">
+  <form method="post" action="{% url 'sales:advance' order.pk %}">{% csrf_token %}<button type="submit">{% if order.status == 'draft' %}Confirm order{% else %}Mark as completed{% endif %}</button></form>
+  <form method="post" action="{% url 'sales:cancel' order.pk %}">{% csrf_token %}<button type="submit" class="secondary">Cancel order</button></form>
+</div>
+{% endif %}
 {% endblock %}

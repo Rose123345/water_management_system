@@ -101,7 +101,7 @@
         <a href="{% url 'about' %}">About</a>
         <a href="{% url 'contact:contact' %}">Contact</a>
         {% if user.is_authenticated %}
-          <a class="nav-cta" href="{% url 'dashboard:home' %}">Open workspace</a>
+          <a class="nav-cta" href="{{ workspace_home }}">{% if is_customer_account %}My account{% else %}Open workspace{% endif %}</a>
         {% else %}
           <a class="nav-cta" href="{% url 'accounts:login' %}">Log in</a>
         {% endif %}
@@ -121,9 +121,9 @@
         <p class="footer-description">Water manufacturing and distribution operations, connected in one dependable workspace.</p>
       </div>
       <div><h2 class="footer-heading">Explore</h2><nav class="footer-links" aria-label="Footer navigation"><a href="{% url 'products:catalogue' %}">Product catalogue</a><a href="{% url 'about' %}">About WMDMS</a></nav></div>
-      <div><h2 class="footer-heading">Access</h2><nav class="footer-links" aria-label="Account links"><a href="{% url 'contact:contact' %}">Contact the team</a><a href="{% url 'accounts:login' %}">Staff sign in</a></nav></div>
+      <div><h2 class="footer-heading">Access</h2><nav class="footer-links" aria-label="Account links"><a href="{% url 'contact:contact' %}">Contact the team</a><a href="{% url 'accounts:login' %}">Sign in</a><a href="{% url 'accounts:register' %}">Create a customer account</a></nav></div>
     </div>
-    <div class="footer-cta-band"><div class="footer-cta-inner"><div><span class="footer-kicker">WMDMS workspace</span><p class="footer-prompt">Every step of water operations, in one workspace.</p></div><a class="footer-cta" href="{% if user.is_authenticated %}{% url 'dashboard:home' %}{% else %}{% url 'accounts:login' %}{% endif %}">{% if user.is_authenticated %}Open workspace{% else %}Enter the workspace{% endif %}<span aria-hidden="true">&rarr;</span></a></div></div>
+    <div class="footer-cta-band"><div class="footer-cta-inner"><div><span class="footer-kicker">WMDMS workspace</span><p class="footer-prompt">Every step of water operations, in one workspace.</p></div><a class="footer-cta" href="{{ workspace_home }}">{% if is_customer_account %}My account{% elif user.is_authenticated %}Open workspace{% else %}Enter the workspace{% endif %}<span aria-hidden="true">&rarr;</span></a></div></div>
     <div class="footer-bottom"><span>Water Manufacturing &amp; Distribution Management System</span><span>Built for reliable water operations</span></div>
   </footer>
   <script src="{% static 'dashboard/navigation-loader.js' %}" defer></script>

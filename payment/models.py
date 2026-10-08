@@ -35,6 +35,8 @@ class Payment(models.Model):
 		return f'{self.order.order_number} - {self.amount}'
 
 	def clean(self):
+		if self.amount is None:
+			return
 		if self.amount <= 0:
 			raise ValidationError({'amount': 'Payment amount must be greater than zero.'})
 		if self.status == self.Status.COMPLETED and self.order_id:
@@ -49,6 +51,3 @@ class Payment(models.Model):
 	def save(self, *args, **kwargs):
 		self.full_clean()
 		super().save(*args, **kwargs)
-from django.db import models
-
-# Create your models here.

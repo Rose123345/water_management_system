@@ -1,9 +1,11 @@
 from django.shortcuts import render, redirect
 from django.contrib.auth import authenticate, login as auth_login, logout as auth_logout
-from django.contrib.auth.forms import UserCreationForm
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
 from django.utils.http import url_has_allowed_host_and_scheme
+
+from .forms import CustomerRegistrationForm
+from .permissions import home_url_for
 
 
 def login(request):
@@ -18,7 +20,7 @@ def login(request):
                 next_url, allowed_hosts={request.get_host()}, require_https=request.is_secure()
             ):
                 return redirect(next_url)
-            return redirect('dashboard:home')
+            return redirect(home_url_for(user))
         else:
             messages.error(request, 'Invalid username or password.')
 
@@ -34,15 +36,13 @@ def logout(request):
 
 def register(request):
     if request.method == 'POST':
-        form = UserCreationForm(request.POST)
+        form = CustomerRegistrationForm(request.POST)
         if form.is_valid():
-            form.save()
-            messages.success(
-                request,
-                'Account created. A system administrator must assign your role before you can access the workspace.',
-            )
-            return redirect('accounts:login')
+            user = form.save()
+            auth_login(request, user)
+            messages.success(request, 'Welcome! Your customer account is ready. You can now place orders.')
+            return redirect('portal:home')
     else:
-        form = UserCreationForm()
+        form = CustomerRegistrationForm()
 
     return render(request, 'register.html', {'form': form})
