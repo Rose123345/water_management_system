@@ -5,11 +5,12 @@ from django.test import TestCase
 from django.urls import reverse
 
 from customers.models import Customer
+from distribution.models import Delivery
 from Inventory.models import Stock
 from payment.models import Payment
 
 from .models import Order
-from .services import OrderStatusError, advance_order_status, cancel_order
+from .services import OrderStatusError, advance_order_status, cancel_order, sync_order_with_delivery
 from .testing import make_order, make_product, make_user
 
 
@@ -59,7 +60,7 @@ class OrderPageTests(TestCase):
 
 		response = self.client.get(reverse('sales:detail', args=[order.pk]))
 
-		self.assertContains(response, 'Mark as completed')
+		self.assertContains(response, 'Mark as on the way')
 		self.assertContains(response, 'Cancel order')
 
 	def test_failed_status_change_shows_readable_message(self):
@@ -88,17 +89,55 @@ class OrderWorkflowTests(TestCase):
 		self.assertEqual(order.status, Order.Status.CONFIRMED)
 		self.assertEqual(self.stock(), 7)
 
-	def test_completing_requires_full_payment(self):
+	def test_order_moves_pending_confirmed_on_the_way_delivered(self):
 		order = make_order(product=self.product, quantity=2)
-		advance_order_status(order, self.user)
+		self.assertEqual(order.status, Order.Status.PENDING)
+
+		for expected in (Order.Status.CONFIRMED, Order.Status.ON_THE_WAY, Order.Status.DELIVERED):
+			advance_order_status(order, self.user)
+			order.refresh_from_db()
+			self.assertEqual(order.status, expected)
 
 		with self.assertRaises(OrderStatusError):
 			advance_order_status(order, self.user)
 
-		Payment.objects.create(order=order, amount=order.total, method=Payment.Method.CASH)
+	def test_advancing_order_updates_its_delivery(self):
+		order = make_order(product=self.product, quantity=1)
 		advance_order_status(order, self.user)
-		order.refresh_from_db()
-		self.assertEqual(order.status, Order.Status.COMPLETED)
+		delivery = Delivery.objects.create(order=order, address='Kumasi')
+
+		advance_order_status(order, self.user)
+		delivery.refresh_from_db()
+		self.assertEqual(delivery.status, Delivery.Status.OUT_FOR_DELIVERY)
+
+		advance_order_status(order, self.user)
+		delivery.refresh_from_db()
+		self.assertEqual(delivery.status, Delivery.Status.DELIVERED)
+		self.assertIsNotNone(delivery.delivered_at)
+
+	def test_delivery_status_drives_order_status(self):
+		order = make_order(product=self.product, quantity=1)
+		advance_order_status(order, self.user)
+		delivery = Delivery.objects.create(order=order, address='Kumasi')
+
+		for delivery_status, order_status in [
+			(Delivery.Status.OUT_FOR_DELIVERY, Order.Status.ON_THE_WAY),
+			(Delivery.Status.FAILED, Order.Status.CONFIRMED),
+			(Delivery.Status.DELIVERED, Order.Status.DELIVERED),
+		]:
+			delivery.status = delivery_status
+			delivery.save()
+			sync_order_with_delivery(delivery)
+			order.refresh_from_db()
+			self.assertEqual(order.status, order_status)
+
+	def test_order_on_the_way_cannot_be_cancelled(self):
+		order = make_order(product=self.product, quantity=1)
+		advance_order_status(order, self.user)
+		advance_order_status(order, self.user)
+
+		with self.assertRaises(OrderStatusError):
+			cancel_order(order, self.user)
 
 	def test_cancelling_confirmed_order_returns_stock(self):
 		order = make_order(product=self.product, quantity=4)

@@ -9,10 +9,10 @@
   <div class="detail-item"><span class="detail-label">Balance due</span><span class="detail-value">GH₵{{ order.balance|floatformat:2 }}</span></div>
 </div>
 <section class="section-block"><h2 class="section-title">Items <small>{{ items|length }} lines</small></h2><div class="table-panel"><div class="table-wrap"><table><thead><tr><th>Product</th><th>Quantity</th><th>Unit price</th><th>Line total</th></tr></thead><tbody>{% for item in items %}<tr><td>{{ item.product }}</td><td>{{ item.quantity }}</td><td>GH₵{{ item.unit_price|floatformat:2 }}</td><td>GH₵{{ item.line_total|floatformat:2 }}</td></tr>{% empty %}<tr><td colspan="4" class="empty-state">No items on this order.</td></tr>{% endfor %}</tbody></table></div></div></section>
-{% if can_manage and order.status == 'draft' or can_manage and order.status == 'confirmed' %}
+{% if can_manage and next_step %}
 <div class="detail-actions">
-  <form method="post" action="{% url 'sales:advance' order.pk %}">{% csrf_token %}<button type="submit">{% if order.status == 'draft' %}Confirm order{% else %}Mark as completed{% endif %}</button></form>
-  <form method="post" action="{% url 'sales:cancel' order.pk %}">{% csrf_token %}<button type="submit" class="secondary">Cancel order</button></form>
+  <form method="post" action="{% url 'sales:advance' order.pk %}">{% csrf_token %}<button type="submit">{{ next_step }}</button></form>
+  {% if order.status == 'pending' or order.status == 'confirmed' %}<form method="post" action="{% url 'sales:cancel' order.pk %}">{% csrf_token %}<button type="submit" class="secondary">Cancel order</button></form>{% endif %}
 </div>
 {% endif %}
 {% endblock %}

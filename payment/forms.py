@@ -11,6 +11,10 @@ class PaymentForm(forms.ModelForm):
     def __init__(self, *args, order=None, **kwargs):
         super().__init__(*args, **kwargs)
         self.order = order
+        # Paystack payments are only recorded automatically after Paystack confirms them.
+        self.fields['method'].choices = [
+            choice for choice in self.fields['method'].choices if choice[0] != Payment.Method.PAYSTACK
+        ]
 
     def clean_amount(self):
         amount = self.cleaned_data['amount']

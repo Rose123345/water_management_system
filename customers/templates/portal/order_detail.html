@@ -4,9 +4,9 @@
 {% block content %}
 <header class="page-heading">
   <div><span class="page-kicker">Order details</span><h1>{{ order.order_number }}</h1><p>Placed {{ order.created_at|date:"M j, Y" }}</p></div>
-  <div class="page-actions"><span class="status-tag status-{{ order.status|slugify }}">{{ order.get_status_display }}</span><a class="action-link" href="{% url 'portal:home' %}">All orders</a></div>
+  <div class="page-actions"><span class="status-tag status-{{ order.status|slugify }}">{{ order.get_status_display }}</span><a class="action-link" href="{% url 'portal:home' %}">All orders</a>{% if can_pay_online %}<form class="inline-form" method="post" action="{% url 'portal:order_pay' order.pk %}">{% csrf_token %}<button type="submit">Pay GH₵{{ order.balance|floatformat:2 }} now</button></form>{% endif %}</div>
 </header>
-{% if order.status == 'draft' %}<p>We have received your order and will confirm it shortly.</p>{% endif %}
+{% if order.status == 'pending' %}<p>We have received your order and will confirm it shortly.</p>{% elif order.status == 'confirmed' %}<p>Your order is confirmed and being prepared for delivery.</p>{% elif order.status == 'on_the_way' %}<p>Your order is on the way.</p>{% elif order.status == 'delivered' %}<p>Your order has been delivered. Thank you!</p>{% endif %}
 <div class="detail-grid">
   <div class="detail-item"><span class="detail-label">Total</span><span class="detail-value">GH₵{{ order.total|floatformat:2 }}</span></div>
   <div class="detail-item"><span class="detail-label">Paid</span><span class="detail-value">GH₵{{ order.amount_paid|floatformat:2 }}</span></div>
@@ -21,5 +21,5 @@
   <thead><tr><th>Date</th><th>Amount</th><th>Method</th><th>Reference</th></tr></thead>
   <tbody>{% for payment in payments %}<tr><td>{{ payment.payment_date|date:"M j, Y" }}</td><td>GH₵{{ payment.amount|floatformat:2 }}</td><td>{{ payment.get_method_display }}</td><td>{{ payment.reference|default:"-" }}</td></tr>{% empty %}<tr><td colspan="4" class="empty-state">No payments recorded yet.</td></tr>{% endfor %}</tbody>
 </table></div></div></section>
-{% if order.status == 'draft' %}<div class="detail-actions"><form method="post" action="{% url 'portal:order_cancel' order.pk %}">{% csrf_token %}<button type="submit" class="secondary">Cancel this order</button></form></div>{% endif %}
+{% if order.status == 'pending' %}<div class="detail-actions"><form method="post" action="{% url 'portal:order_cancel' order.pk %}">{% csrf_token %}<button type="submit" class="secondary">Cancel this order</button></form></div>{% endif %}
 {% endblock %}

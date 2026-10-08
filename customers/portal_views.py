@@ -1,10 +1,12 @@
 from django.contrib import messages
 from django.db import transaction
 from django.shortcuts import get_object_or_404, redirect, render
+from django.urls import reverse
 from django.views.decorators.http import require_POST
 
 from accounts.permissions import customer_required
 from Inventory.services import products_with_stock
+from payment import paystack
 from products.models import Product
 from sales.forms import CustomerOrderItemFormSet
 from sales.models import Order
@@ -62,7 +64,13 @@ def portal_order_create(request):
         )
         return redirect('portal:order_detail', pk=order.pk)
 
-    return render(request, 'portal/order_form.html', {'formset': formset})
+    return render(request, 'portal/order_form.html', {
+        'formset': formset,
+        'product_prices': {
+            str(pk): str(price) for pk, price in
+            Product.objects.filter(status=Product.Status.ACTIVE).values_list('pk', 'unit_price')
+        },
+    })
 
 
 @customer_required
@@ -74,6 +82,7 @@ def portal_order_detail(request, pk):
         'items': order.items.select_related('product'),
         'payments': order.payments.filter(status='completed'),
         'delivery': getattr(order, 'delivery', None),
+        'can_pay_online': _can_pay_online(order),
     })
 
 
@@ -82,8 +91,8 @@ def portal_order_detail(request, pk):
 def portal_order_cancel(request, pk):
     customer = request.user.customer_profile
     order = get_object_or_404(Order, pk=pk, customer=customer)
-    if order.status != Order.Status.DRAFT:
-        messages.error(request, 'Only orders that have not been confirmed yet can be cancelled.')
+    if order.status != Order.Status.PENDING:
+        messages.error(request, 'Only pending orders can be cancelled. Please contact us about confirmed orders.')
     else:
         try:
             cancel_order(order, request.user)
@@ -113,3 +122,54 @@ def portal_profile(request):
         return redirect('portal:home')
 
     return render(request, 'portal/profile_form.html', {'form': form, 'creating': creating})
+
+
+def _can_pay_online(order):
+    return paystack.is_configured() and order.status != Order.Status.CANCELLED and order.balance > 0
+
+
+@customer_required
+@require_POST
+def portal_order_pay(request, pk):
+    customer = request.user.customer_profile
+    order = get_object_or_404(Order, pk=pk, customer=customer)
+    if not _can_pay_online(order):
+        messages.error(request, 'This order cannot be paid online right now.')
+        return redirect('portal:order_detail', pk=pk)
+
+    email = customer.email or request.user.email
+    if not email:
+        messages.error(request, 'Please add your email address before paying online. Paystack sends your receipt there.')
+        return redirect('portal:profile')
+
+    try:
+        checkout_url = paystack.initialize_payment(
+            order, email, request.build_absolute_uri(reverse('portal:paystack_callback'))
+        )
+    except paystack.PaystackError as error:
+        messages.error(request, f'Online payment is unavailable: {error}')
+        return redirect('portal:order_detail', pk=pk)
+    return redirect(checkout_url)
+
+
+@customer_required
+def portal_paystack_callback(request):
+    """Paystack sends the customer back here; verify with Paystack before recording anything."""
+    reference = request.GET.get('reference', '')
+    if not reference:
+        return redirect('portal:home')
+
+    try:
+        payment = paystack.record_successful_payment(paystack.verify_payment(reference))
+    except paystack.PaystackError as error:
+        messages.error(request, f'We could not confirm your payment: {error}')
+        return redirect('portal:home')
+
+    if payment is None:
+        messages.error(request, 'Your payment was not completed. You have not been charged.')
+        return redirect('portal:home')
+
+    messages.success(request, f'Payment of GH₵{payment.amount:.2f} received. Thank you!')
+    if payment.order.customer_id == request.user.customer_profile.pk:
+        return redirect('portal:order_detail', pk=payment.order_id)
+    return redirect('portal:home')

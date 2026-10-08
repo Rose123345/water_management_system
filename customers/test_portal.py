@@ -74,9 +74,42 @@ class CustomerPortalTests(TestCase):
 
 		order = Order.objects.get(customer=self.customer)
 		self.assertRedirects(response, reverse('portal:order_detail', args=[order.pk]))
-		self.assertEqual(order.status, Order.Status.DRAFT)
+		self.assertEqual(order.status, Order.Status.PENDING)
 		self.assertEqual(order.created_by, self.user)
 		self.assertEqual(order.total, Decimal('19.50'))
+		self.assertContains(self.client.get(reverse('portal:order_detail', args=[order.pk])), 'Pending')
+
+	def test_customer_orders_several_products_at_once(self):
+		second = make_product(name='Sachet bag', price='2.00')
+		third = make_product(name='Big bottle', price='10.00')
+		data = self.order_data(self.product, 1)
+		data.update({
+			'items-TOTAL_FORMS': '3',
+			'items-1-product': second.pk, 'items-1-quantity': '5',
+			'items-2-product': third.pk, 'items-2-quantity': '2',
+		})
+
+		self.client.post(reverse('portal:order_add'), data)
+
+		order = Order.objects.get(customer=self.customer)
+		self.assertEqual(order.items.count(), 3)
+		self.assertEqual(order.total, Decimal('36.50'))
+
+	def test_same_product_twice_gets_a_clear_message(self):
+		data = self.order_data(self.product, 1)
+		data.update({'items-TOTAL_FORMS': '2', 'items-1-product': self.product.pk, 'items-1-quantity': '2'})
+
+		response = self.client.post(reverse('portal:order_add'), data)
+
+		self.assertContains(response, 'more than once')
+		self.assertFalse(Order.objects.exists())
+
+	def test_order_form_offers_add_product_button_with_prices(self):
+		response = self.client.get(reverse('portal:order_add'))
+
+		self.assertContains(response, 'Add another product')
+		self.assertContains(response, 'id="empty-line"')
+		self.assertContains(response, 'GH₵6.50 (out of stock)')
 
 	def test_empty_order_is_rejected(self):
 		data = self.order_data(self.product, 1)
@@ -112,7 +145,7 @@ class CustomerPortalTests(TestCase):
 		self.assertEqual(self.client.get(reverse('portal:order_detail', args=[other.pk])).status_code, 404)
 		self.client.post(reverse('portal:order_cancel', args=[other.pk]))
 		other.refresh_from_db()
-		self.assertEqual(other.status, Order.Status.DRAFT)
+		self.assertEqual(other.status, Order.Status.PENDING)
 
 	def test_customer_can_cancel_draft_but_not_confirmed_order(self):
 		draft = make_order(customer=self.customer, product=self.product)

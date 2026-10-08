@@ -185,6 +185,10 @@ STORAGES = {
     }
 }
 
+# Paystack online payments. Use test keys (sk_test_...) until you are ready to go live.
+PAYSTACK_SECRET_KEY = os.environ.get('PAYSTACK_SECRET_KEY', '')
+PAYSTACK_CURRENCY = os.environ.get('PAYSTACK_CURRENCY', 'GHS')
+
 # Email
 # https://docs.djangoproject.com/en/6.1/topics/email/#topic-email-configuration
 

@@ -40,3 +40,14 @@ class DeliveryFormTests(TestCase):
 		self.client.post(reverse('distribution:edit', args=[delivery.pk]), {**data, 'status': Delivery.Status.FAILED})
 		delivery.refresh_from_db()
 		self.assertIsNone(delivery.delivered_at)
+
+	def test_saving_delivery_moves_order_on_the_way(self):
+		self.client.force_login(self.driver)
+
+		self.client.post(reverse('distribution:add'), {
+			'order': self.confirmed.pk, 'address': '12 Ring Road', 'assigned_to': self.driver.pk,
+			'status': Delivery.Status.OUT_FOR_DELIVERY, 'scheduled_date': '2026-10-08',
+		})
+
+		self.confirmed.refresh_from_db()
+		self.assertEqual(self.confirmed.status, Order.Status.ON_THE_WAY)

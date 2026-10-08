@@ -2,15 +2,117 @@
 {% block title %}Place an order | WMDMS{% endblock %}
 {% block page_heading %}Place an order{% endblock %}
 {% block content %}
-<header class="page-heading"><div><span class="page-kicker">New order</span><h1>Place an order</h1><p>Choose the products and quantities you need. Our sales team will confirm your order and arrange delivery.</p></div></header>
+<style>
+  .order-lines { display: grid; gap: 12px; margin-top: 16px; }
+  .order-line { display: grid; grid-template-columns: minmax(0, 1fr) 120px auto; align-items: end; gap: 12px; padding: 14px 16px; border: 1px solid var(--line); border-radius: 5px; background: #fbfcfa; }
+  .order-line label { display: block; }
+  .order-line select, .order-line input { max-width: none; }
+  .order-line .line-errors { grid-column: 1 / -1; margin: 0; color: var(--danger); font-size: 12px; }
+  .order-line .line-errors ul { margin: 0; padding-left: 18px; }
+  .order-line button.secondary { min-height: 42px; }
+  .order-line:only-child button.secondary { visibility: hidden; }
+  #add-line:hover { background: var(--surface); }
+  #add-line:disabled { opacity: .5; cursor: not-allowed; }
+  .order-toolbar { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 12px; margin: 16px 0 6px; }
+  .order-total { font: 700 16px 'Manrope', sans-serif; }
+  .order-total small { color: var(--muted); font: 500 12px 'DM Sans', sans-serif; }
+  @media (max-width: 560px) {
+    .order-line { grid-template-columns: minmax(0, 1fr) 96px; }
+    .order-line button.secondary { grid-column: 1 / -1; }
+  }
+</style>
+<header class="page-heading"><div><span class="page-kicker">New order</span><h1>Place an order</h1><p>Add as many products as you need. Our sales team will confirm your order and arrange delivery.</p></div></header>
 <div class="form-shell entry-form">
-<form method="post">
+<form method="post" id="order-form">
   {% csrf_token %}
   {{ formset.management_form }}
-  {% if formset.non_form_errors %}<div class="flash error" role="alert">{{ formset.non_form_errors }}</div>{% endif %}
-  {% for item_form in formset %}<fieldset><legend>Item {{ forloop.counter }}</legend>{{ item_form.as_p }}</fieldset>{% endfor %}
-  <p>Leave a row empty if you don&rsquo;t need it.</p>
+  {% if formset.non_form_errors %}<div class="flash error" role="alert">{% for error in formset.non_form_errors %}{{ error }} {% endfor %}</div>{% endif %}
+
+  <div class="order-lines" id="order-lines">
+    {% for item_form in formset %}
+    <div class="order-line">
+      <div><label for="{{ item_form.product.id_for_label }}">Product</label>{{ item_form.product }}</div>
+      <div><label for="{{ item_form.quantity.id_for_label }}">Quantity</label>{{ item_form.quantity }}</div>
+      <button type="button" class="secondary" data-remove-line>Remove</button>
+      {% if item_form.errors %}<div class="line-errors" role="alert">{{ item_form.product.errors }}{{ item_form.quantity.errors }}{{ item_form.non_field_errors }}</div>{% endif %}
+    </div>
+    {% endfor %}
+  </div>
+
+  <div class="order-toolbar">
+    <button type="button" class="action-link" id="add-line">+ Add another product</button>
+    <span class="order-total">Estimated total: <span id="order-total">GH₵0.00</span> <small>final price confirmed by our team</small></span>
+  </div>
+
   <div class="form-actions"><button type="submit">Place order</button><a href="{% url 'portal:home' %}">Cancel</a></div>
 </form>
 </div>
+
+<template id="empty-line">
+  <div class="order-line">
+    <div><label for="{{ formset.empty_form.product.id_for_label }}">Product</label>{{ formset.empty_form.product }}</div>
+    <div><label for="{{ formset.empty_form.quantity.id_for_label }}">Quantity</label>{{ formset.empty_form.quantity }}</div>
+    <button type="button" class="secondary" data-remove-line>Remove</button>
+  </div>
+</template>
+{{ product_prices|json_script:"product-prices" }}
+
+<script>
+(function () {
+  const prefix = '{{ formset.prefix }}';
+  const lines = document.getElementById('order-lines');
+  const totalForms = document.getElementById('id_' + prefix + '-TOTAL_FORMS');
+  const maxForms = parseInt(document.getElementById('id_' + prefix + '-MAX_NUM_FORMS').value, 10);
+  const template = document.getElementById('empty-line');
+  const addButton = document.getElementById('add-line');
+  const prices = JSON.parse(document.getElementById('product-prices').textContent);
+  const indexPattern = new RegExp(prefix + '-(\\d+|__prefix__)-');
+
+  // Keep field names numbered 0..n-1 so Django reads every row after adds and removes.
+  function renumber() {
+    const rows = lines.querySelectorAll('.order-line');
+    rows.forEach(function (row, index) {
+      row.querySelectorAll('[name], [id], label[for]').forEach(function (el) {
+        ['name', 'id', 'for'].forEach(function (attr) {
+          const value = el.getAttribute(attr);
+          if (value) el.setAttribute(attr, value.replace(indexPattern, prefix + '-' + index + '-'));
+        });
+      });
+    });
+    totalForms.value = rows.length;
+    addButton.disabled = rows.length >= maxForms;
+    updateTotal();
+  }
+
+  function updateTotal() {
+    let total = 0;
+    lines.querySelectorAll('.order-line').forEach(function (row) {
+      const product = row.querySelector('select');
+      const quantity = row.querySelector('input[type="number"]');
+      const price = prices[product && product.value];
+      const qty = parseInt(quantity && quantity.value, 10);
+      if (price && qty > 0) total += parseFloat(price) * qty;
+    });
+    document.getElementById('order-total').textContent = 'GH₵' + total.toFixed(2);
+  }
+
+  addButton.addEventListener('click', function () {
+    lines.appendChild(template.content.cloneNode(true));
+    renumber();
+    lines.lastElementChild.querySelector('select').focus();
+  });
+
+  lines.addEventListener('click', function (event) {
+    if (!event.target.matches('[data-remove-line]')) return;
+    if (lines.children.length > 1) {
+      event.target.closest('.order-line').remove();
+      renumber();
+    }
+  });
+
+  lines.addEventListener('input', updateTotal);
+  lines.addEventListener('change', updateTotal);
+  renumber();
+})();
+</script>
 {% endblock %}

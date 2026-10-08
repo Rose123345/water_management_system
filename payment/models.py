@@ -9,6 +9,7 @@ class Payment(models.Model):
 		MOBILE_MONEY = 'mobile_money', 'Mobile money'
 		BANK_TRANSFER = 'bank_transfer', 'Bank transfer'
 		CARD = 'card', 'Card'
+		PAYSTACK = 'paystack', 'Paystack (online)'
 
 	class Status(models.TextChoices):
 		PENDING = 'pending', 'Pending'
@@ -43,7 +44,8 @@ class Payment(models.Model):
 			other_payments = self.order.payments.filter(
 				status=self.Status.COMPLETED
 			).exclude(pk=self.pk)
-			if self.amount > self.order.total - sum(
+			# Online payments were already captured by Paystack, so they are always recorded.
+			if self.method != self.Method.PAYSTACK and self.amount > self.order.total - sum(
 				payment.amount for payment in other_payments
 			):
 				raise ValidationError({'amount': 'Payment cannot exceed the order balance.'})

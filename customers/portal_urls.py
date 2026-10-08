@@ -10,5 +10,7 @@ urlpatterns = [
     path('profile/', portal_views.portal_profile, name='profile'),
     path('orders/new/', portal_views.portal_order_create, name='order_add'),
     path('orders/<int:pk>/', portal_views.portal_order_detail, name='order_detail'),
+    path('orders/<int:pk>/pay/', portal_views.portal_order_pay, name='order_pay'),
+    path('payments/paystack/return/', portal_views.portal_paystack_callback, name='paystack_callback'),
     path('orders/<int:pk>/cancel/', portal_views.portal_order_cancel, name='order_cancel'),
 ]

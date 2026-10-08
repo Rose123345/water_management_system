@@ -1,9 +1,11 @@
 from django import forms
 from django.contrib.auth import get_user_model
+from django.db import transaction
 from django.db.models import Q
 from django.utils import timezone
 
 from sales.models import Order
+from sales.services import sync_order_with_delivery
 
 from .models import Delivery
 
@@ -22,9 +24,9 @@ class DeliveryForm(forms.ModelForm):
         current_order = self.instance.order_id if self.instance.pk else None
         current_assignee = self.instance.assigned_to_id if self.instance.pk else None
 
-        # Only confirmed or completed orders without a delivery can be scheduled.
+        # Only confirmed orders, or ones already on the way, without a delivery can be scheduled.
         self.fields['order'].queryset = Order.objects.filter(
-            Q(status__in=[Order.Status.CONFIRMED, Order.Status.COMPLETED], delivery__isnull=True)
+            Q(status__in=[Order.Status.CONFIRMED, Order.Status.ON_THE_WAY], delivery__isnull=True)
             | Q(pk=current_order)
         ).select_related('customer')
 
@@ -39,5 +41,7 @@ class DeliveryForm(forms.ModelForm):
         else:
             delivery.delivered_at = None
         if commit:
-            delivery.save()
+            with transaction.atomic():
+                delivery.save()
+                sync_order_with_delivery(delivery)
         return delivery

@@ -10,6 +10,12 @@ from .services import advance_order_status, cancel_order, OrderStatusError
 
 MANAGE_ROLES = ['Administrator', 'Sales Officer']
 
+NEXT_STEP_LABELS = {
+    Order.Status.PENDING: 'Confirm order',
+    Order.Status.CONFIRMED: 'Mark as on the way',
+    Order.Status.ON_THE_WAY: 'Mark as delivered',
+}
+
 
 def _error_text(error):
     if isinstance(error, ValidationError):
@@ -64,6 +70,7 @@ def order_detail(request, pk):
         'order': order,
         'items': order.items.select_related('product'),
         'can_manage': in_groups(request.user, MANAGE_ROLES),
+        'next_step': NEXT_STEP_LABELS.get(order.status),
         'can_record_payment': (
             order.status != Order.Status.CANCELLED
             and order.balance > 0

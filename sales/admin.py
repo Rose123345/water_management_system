@@ -28,15 +28,15 @@ class OrderItemInline(admin.TabularInline):
     can_delete = False
 
     def get_readonly_fields(self, request, obj=None):
-        if obj and obj.status != Order.Status.DRAFT:
+        if obj and obj.status != Order.Status.PENDING:
             return ('product', 'quantity', 'unit_price', 'line_total')
         return self.readonly_fields
 
     def has_add_permission(self, request, obj=None):
-        return obj is None or obj.status == Order.Status.DRAFT
+        return obj is None or obj.status == Order.Status.PENDING
 
     def has_delete_permission(self, request, obj=None):
-        return obj is None or obj.status == Order.Status.DRAFT
+        return obj is None or obj.status == Order.Status.PENDING
 
     @admin.display(description='Line total')
     def display_line_total(self, obj):

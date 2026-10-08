@@ -8,16 +8,17 @@ from django.db import models, transaction
 
 class Order(models.Model):
 	class Status(models.TextChoices):
-		DRAFT = 'draft', 'Draft'
+		PENDING = 'pending', 'Pending'
 		CONFIRMED = 'confirmed', 'Confirmed'
-		COMPLETED = 'completed', 'Completed'
+		ON_THE_WAY = 'on_the_way', 'On the way'
+		DELIVERED = 'delivered', 'Delivered'
 		CANCELLED = 'cancelled', 'Cancelled'
 
 	order_number = models.CharField(max_length=20, unique=True, editable=False)
 	customer = models.ForeignKey(
 		'customers.Customer', on_delete=models.PROTECT, related_name='orders'
 	)
-	status = models.CharField(max_length=12, choices=Status.choices, default=Status.DRAFT)
+	status = models.CharField(max_length=12, choices=Status.choices, default=Status.PENDING)
 	created_by = models.ForeignKey(
 		settings.AUTH_USER_MODEL, on_delete=models.SET_NULL,
 		null=True, blank=True, related_name='orders_created'
